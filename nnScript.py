@@ -75,6 +75,33 @@ def preprocess():
     
     
 
+def feedforward(w1, w2, p):
+    n_classes=10
+    n_feature=p.shape[0]
+    n_hidden_Nodes=w1.shape[0]
+    a=np.zeroes((n_hidden_Nodes,1),dtype=float)
+    b=np.zeroes((n_classes,1),dtype=float)
+    for i in range(n_hidden_Nodes):
+        for j in range(n_feature):
+    		a[i]+=w1[i,j]*p[j]
+        a[i]+=1
+
+    
+    for j in range(n_hidden_Nodes):
+        z[j]=sigmoid(a[j])
+
+    for l in range(n_classes):
+        for j in range(n_hidden_Nodes):
+            b[l]+=w2[l,j]*z[j]
+        b[l]+=1
+
+        
+    for l in range(n_classes):
+        o[l]=sigmoid(b[l])
+
+    return(o)
+
+
 def nnObjFunction(params, *args):
     """% nnObjFunction computes the value of objective function (negative log 
     %   likelihood error function with regularization) given the parameters 
@@ -127,22 +154,31 @@ def nnObjFunction(params, *args):
     #
     #this small snippet of code will compute the error over the whole training data set...
     for i in range(training_data.shape[0])
+    	ol=feedforward(w1,w2,training_data[i])
         #this line of code will compute the error for one single training example
-	obj_val+=np.sum(np.square(np.subtract(training_label[i], nnPredict(w1, w2, training_data[i]))))/2
+	obj_val+=np.sum(np.square(np.subtract(vectorize(training_label[i]), o[i])))/2
 
     obj_val/=training_data.shape[0]
     
     obj_val+=(lambda/(2*training_data.shape[0]))*(np.sum(np.square(np.squeeze(np.asarray(w1))))+
                                                   np.sum(np.square(np.squueze(asarray(w2))))) #add regularization term
-
+    
     
     #Make sure you reshape the gradient matrices to a 1D array. for instance if your gradient matrices are grad_w1 and grad_w2
     #you would use code similar to the one below to create a flat array
-    #obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
-    obj_grad = np.array([])
-    
-    return (obj_val,obj_grad)
+    grad_w1 = np.zeros(n_hidden) 
+    for j in range(trai)
+    for i in range(grad_w1.shape[0])
+        grad_w1[i]+=
 
+
+    obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
+    #obj_grad = np.array([])
+    
+    
+
+
+    return (obj_val,obj_grad)
 
 
 def nnPredict(w1,w2,data):
