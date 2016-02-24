@@ -24,10 +24,10 @@ def sigmoid(z):
     """# Notice that z can be a scalar, a vector or a matrix
     # return the sigmoid of input z"""
     if (np.ndim(z) ==0):
-            return(1/(1-exp(-z))) #scalar
+            return(1/(1+exp(-z))) #scalar
     else: 
         if (np.ndim(z)==1):
-            return(map((lambda x: (1/(1-exp(-x)))), z)) #1-dimensional array
+            return(map((lambda x: (1/(1+exp(-x)))), z)) #1-dimensional array
         else:# 2-dimensional array or matrix
             a = np.zeros(shape=(z.shape[0], z.shape[1]))
             for i in range(a.shape[0]):
@@ -35,6 +35,35 @@ def sigmoid(z):
                     a[i,j]=sigmoid(z[i,j])
         return(a)
 
+def identity(x):
+    return(x)
+
+def feedforward(w1, w2, p):
+    n_classes=3
+    n_feature=p.shape[0]
+    n_hidden_Nodes=w1.shape[0]
+    a=np.zeros((n_hidden_Nodes,1),dtype=float)
+    z=np.zeros((n_hidden_Nodes,1),dtype=float)
+    b=np.zeros((n_classes,1),dtype=float)
+    o=np.zeros((n_classes,1),dtype=float)
+    for i in range(n_hidden_Nodes):
+        for j in range(n_feature):
+    		a[i]+=w1[i,j]*p[j]
+        a[i]+=1
+
+    for j in range(n_hidden_Nodes):
+        z[j]=sigmoid(a[j])
+
+    for l in range(n_classes):
+        for j in range(n_hidden_Nodes):
+            b[l]+=w2[l,j]*z[j]
+        b[l]+=1
+
+        
+    for l in range(n_classes):
+        o[l]=sigmoid(b[l])
+
+    return(o)
 def preprocess():
     """ Input:
      Although this function doesn't have any input, you are required to load
