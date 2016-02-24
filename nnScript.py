@@ -20,15 +20,20 @@ def initializeWeights(n_in,n_out):
     W = (np.random.rand(n_out, n_in + 1)*2* epsilon) - epsilon;
     return W
     
-    
-    
 def sigmoid(z):
     """# Notice that z can be a scalar, a vector or a matrix
     # return the sigmoid of input z"""
-    
-    return  #your code here
-    
-    
+    if (np.ndim(z) ==0):
+            return(1/(1-exp(-z))) #scalar
+    else: 
+        if (np.ndim(z)==1):
+            return(map((lambda x: (1/(1-exp(-x)))), z)) #1-dimensional array
+        else:# 2-dimensional array or matrix
+            a = np.zeros(shape=(z.shape[0], z.shape[1]))
+            for i in range(a.shape[0]):
+                for j in range(a.shape[1]):
+                    a[i,j]=sigmoid(z[i,j])
+        return(a)
 
 def preprocess():
     """ Input:
@@ -153,15 +158,15 @@ def nnObjFunction(params, *args):
     #
     #
     #this small snippet of code will compute the error over the whole training data set...
-    for i in range(training_data.shape[0])
-    	ol=feedforward(w1,w2,training_data[i])
-        #this line of code will compute the error for one single training example
-	obj_val+=np.sum(np.square(np.subtract(vectorize(training_label[i]), o[i])))/2
+    # for i in range(training_data.shape[0])
+    # 	ol=feedforward(w1,w2,training_data[i])
+    #     #this line of code will compute the error for one single training example
+    #     obj_val+=np.sum(np.square(np.subtract(vectorize(training_label[i]), o[i])))/2
 
-    obj_val/=training_data.shape[0]
+    # obj_val/=training_data.shape[0]
     
-    obj_val+=(lambda/(2*training_data.shape[0]))*(np.sum(np.square(np.squeeze(np.asarray(w1))))+
-                                                  np.sum(np.square(np.squueze(asarray(w2))))) #add regularization term
+    # obj_val+=(lambda/(2*training_data.shape[0]))*(np.sum(np.square(np.squeeze(np.asarray(w1))))+
+    #                                               np.sum(np.square(np.squueze(asarray(w2))))) #add regularization term
     
     
     #Make sure you reshape the gradient matrices to a 1D array. for instance if your gradient matrices are grad_w1 and grad_w2
