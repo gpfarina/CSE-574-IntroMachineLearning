@@ -160,23 +160,24 @@ def nnObjFunction(params, *args):
     #
     #
     #this small snippet of code will compute the error over the whole training data set...
-    # for i in range(training_data.shape[0])
-    # 	ol=feedforward(w1,w2,training_data[i])
-    #     #this line of code will compute the error for one single training example
-    #     obj_val+=np.sum(np.square(np.subtract(vectorize(training_label[i]), o[i])))/2
+     for i in range(training_data.shape[0])
+        o=feedforward(w1,w2,training_data[i]) #maybe feedforward should return also z cause we need it after to compute grad_w1 and grad_w2, which we should do inside this for 
+        #this line of code will compute the error for one single training example
+        obj_val+=np.sum(np.square(np.subtract(vectorize(training_label[i]), o)))/2
 
-    # obj_val/=training_data.shape[0]
+     obj_val/=training_data.shape[0]
     
-    # obj_val+=(lambda/(2*training_data.shape[0]))*(np.sum(np.square(np.squeeze(np.asarray(w1))))+
-    #                                               np.sum(np.square(np.squueze(asarray(w2))))) #add regularization term
+     #obj_val+=(lambda/(2*training_data.shape[0]))*(np.sum(np.square(np.squeeze(np.asarray(w1))))+
+       #                                            np.sum(np.square(np.squueze(asarray(w2))))) #add regularization term
     
     
     #Make sure you reshape the gradient matrices to a 1D array. for instance if your gradient matrices are grad_w1 and grad_w2
     #you would use code similar to the one below to create a flat array
-    grad_w1 = np.zeros(n_hidden) 
-    for j in range(trai)
-    for i in range(grad_w1.shape[0])
-        grad_w1[i]+=
+    grad_w2 = np.zeros(n_classes*(n_hidden+1)).reshape(nclasses, n_hidden+1) 
+    for p in range(training_data.shape[0]):
+        for l in range(nclasses):
+            for j in range(n_hidden+1):
+                grad_w2[l,j]+=
 
 
     obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
