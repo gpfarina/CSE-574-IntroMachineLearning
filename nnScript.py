@@ -107,7 +107,36 @@ def preprocess():
     mat = loadmat('mnist_all.mat') #loads the MAT object as a Dictionary
     
     #Pick a reasonable size for validation data
-    
+
+    for i in range(10):
+        m = mat.get('train'+str(i))
+        num_row=m.shape[0]
+        label=np.ones((num_row,1),dtype=int)
+        c=np.append(m,label*i,axis=1)
+        mat['train'+str(i)]=c
+
+    for i in range(10):
+        m = mat.get('test'+str(i))
+        num_row=m.shape[0]
+        label=np.ones((num_row,1),dtype=int)
+        c=np.append(m,label*i,axis=1)
+        mat['test'+str(i)]=c
+
+    train_stack=mat.get('train0')
+    for i in range(1,10):
+        temp123=mat.get('train'+str(i))
+        train_stack=np.concatenate((train_stack,temp123),axis=0)
+  
+    test_stack=mat.get('test0')
+
+    for i in range(1,10):
+        temp=mat.get('test'+str(i))
+        test_stack=np.concatenate((test_stack,temp),axis=0)
+
+    split = range(train_stack.shape[0])
+    aperm = np.random.permutation(split)
+    train_stack_tdata = train_stack[aperm[0:50000],:]
+    train_stack_vdata = train_stack[aperm[50000:],:]
     
     #Your code here
     train_data = np.array([])
@@ -119,10 +148,14 @@ def preprocess():
     
     return train_data, train_label, validation_data, validation_label, test_data, test_label
     
-def vectorize(v):
-    r=np.zeros(10)
-    r[v]=1
-    return(r)
+def vectorize(v,nclasses):
+    if(v<nclasses and v>=0):
+        r=np.zeros(10)
+        r[v]=1
+        return(r)
+    else:
+        print("error in vectorize")
+        
 
 
 def nnObjFunction(params, *args):
@@ -176,14 +209,6 @@ def nnObjFunction(params, *args):
     #
     #
     #this small snippet of code will compute the error over the whole training data set...
-     for i in range(training_data.shape[0])
-        o=ff(w1,w2,training_data[i]) #maybe feedforward should return also 
-        #z cause we need it after to compute grad_w1 and grad_w2, which we should do inside this for 
-        #this line of code will compute the error for one single training example
-        obj_val+=np.sum(np.square(np.subtract(vectorize(training_label[i]), o)))/2 #vectorize the o
-
-     obj_val/=training_data.shape[0]
-    
      #obj_val+=(lambda/(2*training_data.shape[0]))*(np.sum(np.square(np.squeeze(np.asarray(w1))))+
        #                                            np.sum(np.square(np.squueze(asarray(w2))))) #add regularization term
     
@@ -191,24 +216,29 @@ def nnObjFunction(params, *args):
     #Make sure you reshape the gradient matrices to a 1D array. for instance if your gradient matrices are grad_w1 and grad_w2
     #you would use code similar to the one below to create a flat array
     grad_w2 = np.zeros(n_class*(n_hidden+1)).reshape(n_class, n_hidden+1) 
+    grad_w1 =  np.zeros(n_hidden*(n_input+1)).reshape(n_hidden, n_input+1) 
     for p in range(training_data.shape[0]):
+        o=ff(w1,w2,training_data[p])
+        obj_val+=np.sum(np.square(np.subtract(vectorize(training_label[i]), o)))/2
+        #obj_val+=(lambda/(2*training_data.shape[0]))*(np.sum(np.square(np.squeeze(np.asarray(w1))))+
+        #                                           np.sum(np.square(np.squueze(asarray(w2))))) #add regularization term
         for l in range(n_class):
             for j in range(n_hidden+1):
                 zj=ff1(w1, training_data[p])
                 ol=ff2(w2, zj, n_class)
                 dl=(1-ol)*ol*(vectorize(training_label[p]) - ol)
                 grad_w2[l,j]+=-dl*zj
-    
-    grad_w1 =  np.zeros(n_hidden*(n_input+1)).reshape(n_hidden, n_input+1) 
-    for p  in range(training_data.shape[0]):
-        zj=ff1(w1, training_data[p])
-        ol=ff2(w2, zj, n_class)
-        dl=(1-ol)*ol*(vectorize(training_label[p]) - ol)
-        tmp=0
-        for l in range(n_class):
-            tmp+=dl*w2[]
-        
-
+        for j in range (n_hidden):
+            zj=ff1(w1, training_data[p])
+            ol=ff2(w2, zj, n_class)
+            dl=(1-ol)*ol*(vectorize(training_label[p]) - ol)
+            for i in range (n_feature+1):
+                summ=0
+                for l in range(nclasses):
+                    summ+=dl*w2[l,j]
+                grad_w1[j,i]+=-(1-zj)*zj*summ*p[i]
+   
+    obj_val/=training_data.shape[0]
     obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
     #obj_grad = np.array([])
     
@@ -216,6 +246,7 @@ def nnObjFunction(params, *args):
 
 
     return (obj_val,obj_grad)
+
 
 
 def nnPredict(w1,w2,data):
@@ -235,8 +266,14 @@ def nnPredict(w1,w2,data):
        
     % Output: 
     % label: a column vector of predicted labels""" 
+
     
-    labels = np.array([])
+    
+    
+    labels = np.zeros(data.shape[0]).reshape(data.shape[0], 1)
+    for i in range(data.shape[0]):
+        o=ff(w1,w2, data[i])
+        labels[i]=o.argmax()
     #Your code here
     
     return labels
