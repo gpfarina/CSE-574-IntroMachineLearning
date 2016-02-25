@@ -119,7 +119,10 @@ def preprocess():
     
     return train_data, train_label, validation_data, validation_label, test_data, test_label
     
-    
+def vectorize(v):
+    r=np.zeros(10)
+    r[v]=1
+    return(r)
 
 
 def nnObjFunction(params, *args):
