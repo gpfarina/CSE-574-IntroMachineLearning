@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.optimize import minimize
 from scipy.io import loadmat
-from math import sqrt
+from math import sqrt, exp
 
 
 def initializeWeights(n_in,n_out):
@@ -135,16 +135,17 @@ def preprocess():
 
     split = range(train_stack.shape[0])
     aperm = np.random.permutation(split)
-    train_stack_tdata = train_stack[aperm[0:50000],:]
-    train_stack_vdata = train_stack[aperm[50000:],:]
+
+    train_stack_tdata = train_stack[aperm[0:5000],:]
+    train_stack_vdata = train_stack[aperm[5000:5000],:]
     
     #Your code here
-    train_data = np.array([])
-    train_label = np.array([])
-    validation_data = np.array([])
-    validation_label = np.array([])
-    test_data = np.array([])
-    test_label = np.array([])
+    train_data = np.array(train_stack_tdata)[:,0:784]
+    train_label = np.array(train_stack_tdata)[:,784:]
+    validation_data = np.array(train_stack_vdata)[:,0:784]
+    validation_label =  np.array(train_stack_vdata)[:,784:]
+    test_data = np.array(test_stack)[:,0:784]
+    test_label = np.array(test_stack)[:,784:]
     
     return train_data, train_label, validation_data, validation_label, test_data, test_label
     
@@ -217,27 +218,30 @@ def nnObjFunction(params, *args):
     #you would use code similar to the one below to create a flat array
     grad_w2 = np.zeros(n_class*(n_hidden+1)).reshape(n_class, n_hidden+1) 
     grad_w1 =  np.zeros(n_hidden*(n_input+1)).reshape(n_hidden, n_input+1) 
+   
+
     for p in range(training_data.shape[0]):
         o=ff(w1,w2,training_data[p])
-        obj_val+=np.sum(np.square(np.subtract(vectorize(training_label[i]), o)))/2
+        obj_val+=np.sum(np.square(np.subtract(vectorize(training_label[p],10), o)))/2
         #obj_val+=(lambda/(2*training_data.shape[0]))*(np.sum(np.square(np.squeeze(np.asarray(w1))))+
         #                                           np.sum(np.square(np.squueze(asarray(w2))))) #add regularization term
+        z=ff1(w1, training_data[p])
+        o=ff2(w2, z, n_class)
+        y=vectorize(training_label[p],10)
         for l in range(n_class):
-            for j in range(n_hidden+1):
-                zj=ff1(w1, training_data[p])
-                ol=ff2(w2, zj, n_class)
-                dl=(1-ol)*ol*(vectorize(training_label[p]) - ol)
-                grad_w2[l,j]+=-dl*zj
+            for j in range(n_hidden):
+                dl=(1-o[l])*o[l]*(y[l] - o[l])
+                grad_w2[l,j]+=-dl*z[j] #problematic lines to check
+            grad_w2[l,50]+=-dl #problematic lines to check
         for j in range (n_hidden):
-            zj=ff1(w1, training_data[p])
-            ol=ff2(w2, zj, n_class)
-            dl=(1-ol)*ol*(vectorize(training_label[p]) - ol)
-            for i in range (n_feature+1):
+            dl=(1-o[l])*o[l]*(y[l] - o[l])
+            for i in range (n_input):
                 summ=0
-                for l in range(nclasses):
+                for l in range(n_class):
                     summ+=dl*w2[l,j]
-                grad_w1[j,i]+=-(1-zj)*zj*summ*p[i]
-   
+                grad_w1[j,i]+=-(1-z[j])*z[j]*summ*training_data[p][i] #problematic lines to check
+            grad_w1[j,784]+=-(1-z[j])*z[j]*summ #problematic lines to check
+
     obj_val/=training_data.shape[0]
     obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
     #obj_grad = np.array([])
