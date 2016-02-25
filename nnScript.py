@@ -38,14 +38,13 @@ def sigmoid(z):
 def identity(x):
     return(x)
 
-def feedforward(w1, w2, p):
-    n_classes=10
+
+def ff1(w1, p):
     n_feature=p.shape[0]
     n_hidden_Nodes=w1.shape[0]
     a=np.zeros((n_hidden_Nodes,1),dtype=float)
     z=np.zeros((n_hidden_Nodes,1),dtype=float)
-    b=np.zeros((n_classes,1),dtype=float)
-    o=np.zeros((n_classes,1),dtype=float)
+    
     for i in range(n_hidden_Nodes):
         for j in range(n_feature):
     		a[i]+=w1[i,j]*p[j]
@@ -53,7 +52,13 @@ def feedforward(w1, w2, p):
 
     for j in range(n_hidden_Nodes):
         z[j]=sigmoid(a[j])
+    return(z)
 
+def ff2(w2, z, n_classes):
+    n_hidden_Nodes=z.shape[0]
+    b=np.zeros((n_classes,1),dtype=float)
+    o=np.zeros((n_classes,1),dtype=float)
+    
     for l in range(n_classes):
         for j in range(n_hidden_Nodes):
             b[l]+=w2[l,j]*z[j]
@@ -64,6 +69,14 @@ def feedforward(w1, w2, p):
         o[l]=sigmoid(b[l])
 
     return(o)
+
+def ff(w1, w2, p):
+    n_classes=10
+    z=ff1(w1,p)
+    o=ff2(w2, z, n_classes)
+    return(o)
+
+
 def preprocess():
     """ Input:
      Although this function doesn't have any input, you are required to load
@@ -161,9 +174,10 @@ def nnObjFunction(params, *args):
     #
     #this small snippet of code will compute the error over the whole training data set...
      for i in range(training_data.shape[0])
-        o=feedforward(w1,w2,training_data[i]) #maybe feedforward should return also z cause we need it after to compute grad_w1 and grad_w2, which we should do inside this for 
+        o=ff(w1,w2,training_data[i]) #maybe feedforward should return also 
+        #z cause we need it after to compute grad_w1 and grad_w2, which we should do inside this for 
         #this line of code will compute the error for one single training example
-        obj_val+=np.sum(np.square(np.subtract(vectorize(training_label[i]), o)))/2
+        obj_val+=np.sum(np.square(np.subtract(vectorize(training_label[i]), o)))/2 #vectorize the o
 
      obj_val/=training_data.shape[0]
     
@@ -173,12 +187,24 @@ def nnObjFunction(params, *args):
     
     #Make sure you reshape the gradient matrices to a 1D array. for instance if your gradient matrices are grad_w1 and grad_w2
     #you would use code similar to the one below to create a flat array
-    grad_w2 = np.zeros(n_classes*(n_hidden+1)).reshape(nclasses, n_hidden+1) 
+    grad_w2 = np.zeros(n_class*(n_hidden+1)).reshape(n_class, n_hidden+1) 
     for p in range(training_data.shape[0]):
-        for l in range(nclasses):
+        for l in range(n_class):
             for j in range(n_hidden+1):
-                grad_w2[l,j]+=
-
+                zj=ff1(w1, training_data[p])
+                ol=ff2(w2, zj, n_class)
+                dl=(1-ol)*ol*(vectorize(training_label[p]) - ol)
+                grad_w2[l,j]+=-dl*zj
+    
+    grad_w1 =  np.zeros(n_hidden*(n_input+1)).reshape(n_hidden, n_input+1) 
+    for p  in range(training_data.shape[0]):
+        zj=ff1(w1, training_data[p])
+        ol=ff2(w2, zj, n_class)
+        dl=(1-ol)*ol*(vectorize(training_label[p]) - ol)
+        tmp=0
+        for l in range(n_class):
+            tmp+=dl*w2[]
+        
 
     obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
     #obj_grad = np.array([])
