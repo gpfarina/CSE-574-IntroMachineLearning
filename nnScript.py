@@ -24,69 +24,27 @@ def initializeWeights(n_in,n_out):
 def sigmoid(z):
     """# Notice that z can be a scalar, a vector or a matrix
     # return the sigmoid of input z"""
-    #if (np.ndim(z) ==0):
     return(1/(1+exp(-1.0*z)))
-    # #print('z:')
-    # #print(z[0])
-    # x=-z[0]
-    # #print('x:')
-    # #print(x)
-    # #print('c:')
-    # c=np.exp(round(x,4))
-    # #print(c)
-    # t=1+c
-    # #print('t')
-    # #print(t)
-    # #print('r')
-    # r=1/(t)
-    # #print(r)
-    # return(r) #scalar
-    # # else: 
-    #     if (np.ndim(z)==1):
-    #         return(map((lambda x: (1/(1+exp(-x)))), z)) #1-dimensional array
-    #     else:# 2-dimensional array or matrix
-    #         a = np.zeros(shape=(z.shape[0], z.shape[1]))
-    #         for i in range(a.shape[0]):
-    #             for j in range(a.shape[1]):
-    #                 a[i,j]=sigmoid(z[i,j])
-    #     return(a)
-
-def identity(x):
-    return(x)
-
 
 def ff1(w1, p):
-    n_feature=p.shape[0]
+    n_feature=p.shape[0]+1
     n_hidden_Nodes=w1.shape[0]
     a=np.zeros(n_hidden_Nodes,dtype=float)
     z=np.zeros(n_hidden_Nodes,dtype=float)
-    
+    p=np.append(p,[1],axis=0)
     for i in range(n_hidden_Nodes):
-         #for j in range(n_feature):
-             #a[i]+=w1[i,j]*p[j]
-         #print(p.shape)
-         #print(w1[i,].shape)
-         a[i]=np.dot(w1[i,0:n_input],p)
-         
+        a[i]=np.dot(w1[i,:],p)
+        z[i]=sigmoid(a[i])
 
-    for j in range(n_hidden_Nodes):
-        z[j]=sigmoid(a[j])
     return(z)
 
 def ff2(w2, z, n_classes):
-    n_hidden_Nodes=z.shape[0]
     b=np.zeros((n_classes,1),dtype=float)
     o=np.zeros((n_classes,1),dtype=float)
-    
+    z=np.append(z,[1], axis=0)
     for l in range(n_classes):
-         #for j in range(n_hidden_Nodes):
-             #b[l]+=w2[l,j]*z[j]
-        #print(z.shape)
-        #print(w2[l,].shape)
-        b[l]=np.dot(w2[l,0:n_hidden],z)
-        
+        b[l]=np.dot(w2[l,:],z)
 
-        
     for l in range(n_classes):
         o[l]=sigmoid(b[l])
 
@@ -132,20 +90,18 @@ def preprocess():
 
     for i in range(10):
         m = mat.get('train'+str(i))
-        m=m/255.0
+        m=(m/255.0)
         num_row=m.shape[0]
-        label=np.ones((num_row,1),dtype=int)
-        d=np.append(m,label,axis=1)
-        c=np.append(d,label*i,axis=1)
+        label=np.ones((num_row,(1.0)))
+        c=np.append(m,label*i,axis=1)
         mat['train'+str(i)]=c
 
     for i in range(10):
         m = mat.get('test'+str(i))
-        m=m/255.0
+        m = (m/255.0)
         num_row=m.shape[0]
-        label=np.ones((num_row,1),dtype=int)
-        d=np.append(m,label,axis=1)
-        c=np.append(d,label*i,axis=1)
+        label=np.ones((num_row,(1.0)))
+        c=np.append(m,label*i,axis=1)
         mat['test'+str(i)]=c
 
     train_stack=mat.get('train0')
@@ -163,23 +119,23 @@ def preprocess():
     aperm = np.random.permutation(split)
 
     train_stack_tdata = train_stack[aperm[0:10000],:]
-    train_stack_vdata = train_stack[aperm[10000:11000],:]
+    train_stack_vdata = train_stack[aperm[10000:12000],:]
     
     #Your code here
-    train_data = np.array(train_stack_tdata)[:,0:785]
-    train_label = np.array(train_stack_tdata)[:,785:]
-    validation_data = np.array(train_stack_vdata)[:,0:785]
-    validation_label =  np.array(train_stack_vdata)[:,785:]
-    test_data = np.array(test_stack)[:,0:785]
-    test_label = np.array(test_stack)[:,785:]
+    train_data = np.array(train_stack_tdata)[:,0:784]
+    train_label = np.array(train_stack_tdata)[:,784:]
+    validation_data = np.array(train_stack_vdata)[:,0:784]
+    validation_label =  np.array(train_stack_vdata)[:,784:]
+    test_data = np.array(test_stack)[:,0:784]
+    test_label = np.array(test_stack)[:,784:]
     
     return train_data, train_label, validation_data, validation_label, test_data, test_label
     
-def vectorize(x,nclasses):
-    v=x[0]
+def vectorize(v,nclasses):
+    v=int(v)
     if(v<nclasses and v>=0):
-        r=np.zeros(10)
-        r[v]=1
+        r=np.zeros(nclasses, int)
+        r[v]=int(1)
         return(r)
     else:
         print("error in vectorize")
@@ -225,51 +181,45 @@ def nnObjFunction(params, *args):
     % w2: matrix of weights of connections from hidden layer to output layers.
     %     w2(i, j) represents the weight of connection from unit j in hidden 
     %     layer to unit i in output layer."""
-    
     n_input, n_hidden, n_class, training_data, training_label, lambdaval = args
-    w1 = params[0:n_hidden * (n_input+1 )].reshape(n_hidden, n_input +1)
-    w2 = params[(n_hidden * (n_input +1)):].reshape((n_class, (n_hidden +1)))
-    obj_val = 0  
-     #obj_val+=(lambda/(2*training_data.shape[0]))*(np.sum(np.square(np.squeeze(np.asarray(w1))))+
-       #                                            np.sum(np.square(np.squueze(asarray(w2))))) #add regularization term
+    w1 = params[0:n_hidden * (n_input + 1)].reshape( (n_hidden, (n_input + 1)))
+    w2 = params[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
     
+    obj_val = 0  
+    grad_w1 =  np.zeros(n_hidden*(n_input + 1)).reshape( (n_hidden, (n_input + 1)) ) 
+    grad_w2 =  np.zeros(n_class  * (n_hidden +1 )).reshape((n_class, (n_hidden + 1)))
+   
+    delta=np.zeros(10)
+
+    for p in range(training_data.shape[0]):
+        z=ff1(w1, training_data[p])
+        z1=np.append(z,[1], axis=0)
+        o=ff2(w2, z, n_class)
+        y=vectorize(training_label[p],10)
+        obj_val+=np.sum(np.square(np.subtract(y, o)))/2
+        x=np.append(training_data[p],[1],0)
+
+        for l in range(n_class):
+            delta[l]=(y[l]-o[l])*(1-o[l])*o[l]
+            grad_w2[l,]+=(-delta[l]*z1)
+            #for j in range(n_hidden+1):
+                #grad_w2[l,j]+=-(delta[l]*z1[j])
+
+        for j in range(n_hidden):
+            #tmp=0
+            #for l in range(n_class):
+                #tmp+=delta[l]*w2[l,j]
+            #for i in range(n_input+1):
+                #grad_w1[j,i]+=-(tmp*x[i]*z[j]*(1-z[j]))
+            tmp=np.dot(delta, w2[:,j])
+            grad_w1[j,]+=(-(x*tmp*z[j]*(1-z[j])))
+
     
     #Make sure you reshape the gradient matrices to a 1D array. for instance if your gradient matrices are grad_w1 and grad_w2
     #you would use code similar to the one below to create a flat array
-    grad_w2 = np.zeros(n_class*(n_hidden)).reshape(n_class, n_hidden) 
-    grad_w1 =  np.zeros(n_hidden*(n_input)).reshape(n_hidden, n_input) 
-   
-    delta=np.zeros(10)
-    for p in range(training_data.shape[0]):
-        z=ff1(w1, training_data[p])
-        o=ff2(w2, z, n_class)
-        obj_val+=np.sum(np.square(np.subtract(vectorize(training_label[p],10), o)))/2
-        obj_val/=training_data.shape[0]
-        #obj_val+=(lambda/(2*training_data.shape[0]))*(np.sum(np.square(np.squeeze(np.asarray(w1))))+
-        #                                           np.sum(np.square(np.squueze(asarray(w2))))) #add regularization term
-        y=vectorize(training_label[p],10)
-        for l in range(n_class):
-            delta[l]=(1-o[l])*o[l]*(y[l] - o[l])
-            #for j in range(n_hidden):
-            #print(grad_w2[l,].shape)
-            #print(delta.shape)
-            grad_w2[l,]+=-delta[l]*z#problematic lines to check
-            #grad_w2[l,n_hidden]+=-delta[l] #problematic lines to check
-        for j in range (n_hidden):
-            tmp=-(1-z[j])*z[j]*training_data[p]
-            #for i in range (n_input):
-            summ=0
-            for l in range(n_class):
-                summ+=delta[l]*w2[l,j]
-            grad_w1[j,]+=tmp*summ #problematic lines to check
-            #grad_w1[j,n_input]+=-(1-z[j])*z[j]*summ #problematic lines to check
-
-    obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
-    #obj_grad = np.array([])
-    
-    
-
-
+    obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)/(training_data.shape[0])
+    obj_val/=training_data.shape[0]
+    print(obj_val)
     return (obj_val,obj_grad)
 
 
@@ -299,6 +249,8 @@ def nnPredict(w1,w2,data):
     for i in range(data.shape[0]):
         o=ff(w1,w2, data[i])
         labels[i]=o.argmax()
+
+
     #Your code here
     
     return labels
@@ -351,7 +303,6 @@ print("end minimize")
 #Reshape nnParams from 1D vector into w1 and w2 matrices
 w1 = nn_params.x[0:n_hidden * (n_input + 1)].reshape( (n_hidden, (n_input + 1)))
 w2 = nn_params.x[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
-
 
 #Test the computed parameters
 
