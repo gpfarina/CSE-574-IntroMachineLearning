@@ -3,6 +3,7 @@ from scipy.optimize import minimize
 from scipy.io import loadmat
 from math import sqrt, exp
 
+counter=0;
 
 def initializeWeights(n_in,n_out):
     """
@@ -23,17 +24,32 @@ def initializeWeights(n_in,n_out):
 def sigmoid(z):
     """# Notice that z can be a scalar, a vector or a matrix
     # return the sigmoid of input z"""
-    if (np.ndim(z) ==0):
-            return(1/(1+exp(-z))) #scalar
-    else: 
-        if (np.ndim(z)==1):
-            return(map((lambda x: (1/(1+exp(-x)))), z)) #1-dimensional array
-        else:# 2-dimensional array or matrix
-            a = np.zeros(shape=(z.shape[0], z.shape[1]))
-            for i in range(a.shape[0]):
-                for j in range(a.shape[1]):
-                    a[i,j]=sigmoid(z[i,j])
-        return(a)
+    #if (np.ndim(z) ==0):
+    return(1/(1+exp(-1.0*z)))
+    # #print('z:')
+    # #print(z[0])
+    # x=-z[0]
+    # #print('x:')
+    # #print(x)
+    # #print('c:')
+    # c=np.exp(round(x,4))
+    # #print(c)
+    # t=1+c
+    # #print('t')
+    # #print(t)
+    # #print('r')
+    # r=1/(t)
+    # #print(r)
+    # return(r) #scalar
+    # # else: 
+    #     if (np.ndim(z)==1):
+    #         return(map((lambda x: (1/(1+exp(-x)))), z)) #1-dimensional array
+    #     else:# 2-dimensional array or matrix
+    #         a = np.zeros(shape=(z.shape[0], z.shape[1]))
+    #         for i in range(a.shape[0]):
+    #             for j in range(a.shape[1]):
+    #                 a[i,j]=sigmoid(z[i,j])
+    #     return(a)
 
 def identity(x):
     return(x)
@@ -42,13 +58,16 @@ def identity(x):
 def ff1(w1, p):
     n_feature=p.shape[0]
     n_hidden_Nodes=w1.shape[0]
-    a=np.zeros((n_hidden_Nodes,1),dtype=float)
-    z=np.zeros((n_hidden_Nodes,1),dtype=float)
+    a=np.zeros(n_hidden_Nodes,dtype=float)
+    z=np.zeros(n_hidden_Nodes,dtype=float)
     
     for i in range(n_hidden_Nodes):
-        for j in range(n_feature):
-    		a[i]+=w1[i,j]*p[j]
-        a[i]+=1
+         #for j in range(n_feature):
+             #a[i]+=w1[i,j]*p[j]
+         #print(p.shape)
+         #print(w1[i,].shape)
+         a[i]=np.dot(w1[i,0:n_input],p)
+         
 
     for j in range(n_hidden_Nodes):
         z[j]=sigmoid(a[j])
@@ -60,9 +79,12 @@ def ff2(w2, z, n_classes):
     o=np.zeros((n_classes,1),dtype=float)
     
     for l in range(n_classes):
-        for j in range(n_hidden_Nodes):
-            b[l]+=w2[l,j]*z[j]
-        b[l]+=1
+         #for j in range(n_hidden_Nodes):
+             #b[l]+=w2[l,j]*z[j]
+        #print(z.shape)
+        #print(w2[l,].shape)
+        b[l]=np.dot(w2[l,0:n_hidden],z)
+        
 
         
     for l in range(n_classes):
@@ -110,16 +132,20 @@ def preprocess():
 
     for i in range(10):
         m = mat.get('train'+str(i))
+        m=m/255.0
         num_row=m.shape[0]
         label=np.ones((num_row,1),dtype=int)
-        c=np.append(m,label*i,axis=1)
+        d=np.append(m,label,axis=1)
+        c=np.append(d,label*i,axis=1)
         mat['train'+str(i)]=c
 
     for i in range(10):
         m = mat.get('test'+str(i))
+        m=m/255.0
         num_row=m.shape[0]
         label=np.ones((num_row,1),dtype=int)
-        c=np.append(m,label*i,axis=1)
+        d=np.append(m,label,axis=1)
+        c=np.append(d,label*i,axis=1)
         mat['test'+str(i)]=c
 
     train_stack=mat.get('train0')
@@ -136,20 +162,21 @@ def preprocess():
     split = range(train_stack.shape[0])
     aperm = np.random.permutation(split)
 
-    train_stack_tdata = train_stack[aperm[0:5000],:]
-    train_stack_vdata = train_stack[aperm[5000:5000],:]
+    train_stack_tdata = train_stack[aperm[0:10000],:]
+    train_stack_vdata = train_stack[aperm[10000:11000],:]
     
     #Your code here
-    train_data = np.array(train_stack_tdata)[:,0:784]
-    train_label = np.array(train_stack_tdata)[:,784:]
-    validation_data = np.array(train_stack_vdata)[:,0:784]
-    validation_label =  np.array(train_stack_vdata)[:,784:]
-    test_data = np.array(test_stack)[:,0:784]
-    test_label = np.array(test_stack)[:,784:]
+    train_data = np.array(train_stack_tdata)[:,0:785]
+    train_label = np.array(train_stack_tdata)[:,785:]
+    validation_data = np.array(train_stack_vdata)[:,0:785]
+    validation_label =  np.array(train_stack_vdata)[:,785:]
+    test_data = np.array(test_stack)[:,0:785]
+    test_label = np.array(test_stack)[:,785:]
     
     return train_data, train_label, validation_data, validation_label, test_data, test_label
     
-def vectorize(v,nclasses):
+def vectorize(x,nclasses):
+    v=x[0]
     if(v<nclasses and v>=0):
         r=np.zeros(10)
         r[v]=1
@@ -158,8 +185,10 @@ def vectorize(v,nclasses):
         print("error in vectorize")
         
 
-
 def nnObjFunction(params, *args):
+    global counter
+    counter+=1
+    print(counter)
     """% nnObjFunction computes the value of objective function (negative log 
     %   likelihood error function with regularization) given the parameters 
     %   of Neural Networks, thetraining data, their corresponding training 
@@ -198,51 +227,43 @@ def nnObjFunction(params, *args):
     %     layer to unit i in output layer."""
     
     n_input, n_hidden, n_class, training_data, training_label, lambdaval = args
-    
-    w1 = params[0:n_hidden * (n_input + 1)].reshape( (n_hidden, (n_input + 1)))
-    w2 = params[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
+    w1 = params[0:n_hidden * (n_input+1 )].reshape(n_hidden, n_input +1)
+    w2 = params[(n_hidden * (n_input +1)):].reshape((n_class, (n_hidden +1)))
     obj_val = 0  
-    
-    #Your code here
-    #
-    #
-    #
-    #
-    #
-    #this small snippet of code will compute the error over the whole training data set...
      #obj_val+=(lambda/(2*training_data.shape[0]))*(np.sum(np.square(np.squeeze(np.asarray(w1))))+
        #                                            np.sum(np.square(np.squueze(asarray(w2))))) #add regularization term
     
     
     #Make sure you reshape the gradient matrices to a 1D array. for instance if your gradient matrices are grad_w1 and grad_w2
     #you would use code similar to the one below to create a flat array
-    grad_w2 = np.zeros(n_class*(n_hidden+1)).reshape(n_class, n_hidden+1) 
-    grad_w1 =  np.zeros(n_hidden*(n_input+1)).reshape(n_hidden, n_input+1) 
+    grad_w2 = np.zeros(n_class*(n_hidden)).reshape(n_class, n_hidden) 
+    grad_w1 =  np.zeros(n_hidden*(n_input)).reshape(n_hidden, n_input) 
    
-
+    delta=np.zeros(10)
     for p in range(training_data.shape[0]):
-        o=ff(w1,w2,training_data[p])
-        obj_val+=np.sum(np.square(np.subtract(vectorize(training_label[p],10), o)))/2
-        #obj_val+=(lambda/(2*training_data.shape[0]))*(np.sum(np.square(np.squeeze(np.asarray(w1))))+
-        #                                           np.sum(np.square(np.squueze(asarray(w2))))) #add regularization term
         z=ff1(w1, training_data[p])
         o=ff2(w2, z, n_class)
+        obj_val+=np.sum(np.square(np.subtract(vectorize(training_label[p],10), o)))/2
+        obj_val/=training_data.shape[0]
+        #obj_val+=(lambda/(2*training_data.shape[0]))*(np.sum(np.square(np.squeeze(np.asarray(w1))))+
+        #                                           np.sum(np.square(np.squueze(asarray(w2))))) #add regularization term
         y=vectorize(training_label[p],10)
         for l in range(n_class):
-            for j in range(n_hidden):
-                dl=(1-o[l])*o[l]*(y[l] - o[l])
-                grad_w2[l,j]+=-dl*z[j] #problematic lines to check
-            grad_w2[l,50]+=-dl #problematic lines to check
+            delta[l]=(1-o[l])*o[l]*(y[l] - o[l])
+            #for j in range(n_hidden):
+            #print(grad_w2[l,].shape)
+            #print(delta.shape)
+            grad_w2[l,]+=-delta[l]*z#problematic lines to check
+            #grad_w2[l,n_hidden]+=-delta[l] #problematic lines to check
         for j in range (n_hidden):
-            dl=(1-o[l])*o[l]*(y[l] - o[l])
-            for i in range (n_input):
-                summ=0
-                for l in range(n_class):
-                    summ+=dl*w2[l,j]
-                grad_w1[j,i]+=-(1-z[j])*z[j]*summ*training_data[p][i] #problematic lines to check
-            grad_w1[j,784]+=-(1-z[j])*z[j]*summ #problematic lines to check
+            tmp=-(1-z[j])*z[j]*training_data[p]
+            #for i in range (n_input):
+            summ=0
+            for l in range(n_class):
+                summ+=delta[l]*w2[l,j]
+            grad_w1[j,]+=tmp*summ #problematic lines to check
+            #grad_w1[j,n_input]+=-(1-z[j])*z[j]*summ #problematic lines to check
 
-    obj_val/=training_data.shape[0]
     obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
     #obj_grad = np.array([])
     
@@ -287,8 +308,10 @@ def nnPredict(w1,w2,data):
 
 """**************Neural Network Script Starts here********************************"""
 
-train_data, train_label, validation_data,validation_label, test_data, test_label = preprocess();
 
+print("start")
+train_data, train_label, validation_data,validation_label, test_data, test_label = preprocess();
+print("preprocess done")
 
 #  Train Neural Network
 
@@ -296,7 +319,7 @@ train_data, train_label, validation_data,validation_label, test_data, test_label
 n_input = train_data.shape[1]; 
 
 # set the number of nodes in hidden unit (not including bias unit)
-n_hidden = 50;
+n_hidden = 4;
 				   
 # set the number of nodes in output unit
 n_class = 10;				   
@@ -317,9 +340,9 @@ args = (n_input, n_hidden, n_class, train_data, train_label, lambdaval)
 #Train Neural Network using fmin_cg or minimize from scipy,optimize module. Check documentation for a working example
 
 opts = {'maxiter' : 50}    # Preferred value.
-
+print ("start minimize")
 nn_params = minimize(nnObjFunction, initialWeights, jac=True, args=args,method='CG', options=opts)
-
+print("end minimize")
 #In Case you want to use fmin_cg, you may have to split the nnObjectFunction to two functions nnObjFunctionVal
 #and nnObjGradient. Check documentation for this function before you proceed.
 #nn_params, cost = fmin_cg(nnObjFunctionVal, initialWeights, nnObjGradient,args = args, maxiter = 50)
@@ -349,4 +372,4 @@ predicted_label = nnPredict(w1,w2,test_data)
 
 #find the accuracy on Validation Dataset
 
-print('\n Test set Accuracy:' + + str(100*np.mean((predicted_label == test_label).astype(float))) + '%')
+print('\n Test set Accuracy:' + str(100*np.mean((predicted_label == test_label).astype(float))) + '%')
