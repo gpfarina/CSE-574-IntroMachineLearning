@@ -24,36 +24,16 @@ def initializeWeights(n_in,n_out):
 def sigmoid(z):
     """# Notice that z can be a scalar, a vector or a matrix
     # return the sigmoid of input z"""
-    return(1/(1+exp(-1.0*z)))
+    return(1/(1+np.exp(-1.0*z)))
 
-def ff1(w1, p):
-    n_feature=p.shape[0]+1
-    n_hidden_Nodes=w1.shape[0]
-    a=np.zeros(n_hidden_Nodes,dtype=float)
-    z=np.zeros(n_hidden_Nodes,dtype=float)
-    p=np.append(p,[1],axis=0)
-    for i in range(n_hidden_Nodes):
-        a[i]=np.dot(w1[i,:],p)
-        z[i]=sigmoid(a[i])
-
-    return(z)
-
-def ff2(w2, z, n_classes):
-    b=np.zeros((n_classes,1),dtype=float)
-    o=np.zeros((n_classes,1),dtype=float)
-    z=np.append(z,[1], axis=0)
-    for l in range(n_classes):
-        b[l]=np.dot(w2[l,:],z)
-
-    for l in range(n_classes):
-        o[l]=sigmoid(b[l])
-
-    return(o)
+def step(w, p):
+    p=p.reshape((p.shape[0],1))
+    return(sigmoid(((np.dot(w, np.vstack((p,[1.0])))))))
 
 def ff(w1, w2, p):
     n_classes=10
-    z=ff1(w1,p)
-    o=ff2(w2, z, n_classes)
+    z=step(w1,p)
+    o=step(w2, z)
     return(o)
 
 
@@ -93,7 +73,7 @@ def preprocess():
         m=(m/255.0)
         num_row=m.shape[0]
         label=np.ones((num_row,(1.0)))
-        c=np.append(m,label*i,axis=1)
+        c=np.hstack((m,label*i))
         mat['train'+str(i)]=c
 
     for i in range(10):
@@ -101,7 +81,7 @@ def preprocess():
         m = (m/255.0)
         num_row=m.shape[0]
         label=np.ones((num_row,(1.0)))
-        c=np.append(m,label*i,axis=1)
+        c=np.hstack((m,label*i))
         mat['test'+str(i)]=c
 
     train_stack=mat.get('train0')
@@ -118,8 +98,8 @@ def preprocess():
     split = range(train_stack.shape[0])
     aperm = np.random.permutation(split)
 
-    train_stack_tdata = train_stack[aperm[0:5],:]
-    train_stack_vdata = train_stack[aperm[5:10],:]
+    train_stack_tdata = train_stack[aperm[0:1000],:]
+    train_stack_vdata = train_stack[aperm[1000:1100],:]
     
     #Your code here
     train_data = np.array(train_stack_tdata)[:,0:784]
@@ -184,44 +164,43 @@ def nnObjFunction(params, *args):
     n_input, n_hidden, n_class, training_data, training_label, lambdaval = args
     w1 = params[0:n_hidden * (n_input + 1)].reshape( (n_hidden, (n_input + 1)))
     w2 = params[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
-
-    print(w1.shape)
-    print(train_data[0].shape)
+    
     obj_val = 0  
     grad_w1 =  np.zeros(n_hidden*(n_input + 1)).reshape( (n_hidden, (n_input + 1)) ) 
     grad_w2 =  np.zeros(n_class  * (n_hidden +1 )).reshape((n_class, (n_hidden + 1)))
-   
+
     delta=np.zeros(10)
 
     for p in range(training_data.shape[0]):
-        z=ff1(w1, training_data[p])
-        z1=np.append(z,[1], axis=0)
-        o=ff2(w2, z, n_class)
+        z=step(w1, training_data[p]).reshape((n_hidden,1))
+        z1=np.vstack((z,[1.0]))
+        o=step(w2, z)
         y=vectorize(training_label[p],10)
-        obj_val+=np.sum(np.square(np.subtract(y, o)))/2
-        x=np.append(training_data[p],[1],0)
+        y=y.reshape((y.shape[0],1))
+        obj_val+=np.sum(np.square((y-o)))/2
+        x=training_data[p].reshape((training_data[p].shape[0],1))
+        x=np.vstack((x,1.0))
+        
+        delta=(y-o)*o*(1-o)
 
-        for l in range(n_class):
-            delta[l]=(y[l]-o[l])*(1-o[l])*o[l]
-            grad_w2[l,]+=(-delta[l]*z1)
-            #for j in range(n_hidden+1):
-                #grad_w2[l,j]+=-(delta[l]*z1[j])
-
-        for j in range(n_hidden):
-            #tmp=0
-            #for l in range(n_class):
-                #tmp+=delta[l]*w2[l,j]
-            #for i in range(n_input+1):
-                #grad_w1[j,i]+=-(tmp*x[i]*z[j]*(1-z[j]))
-            tmp=np.dot(delta, w2[:,j])
-            grad_w1[j,]+=(-(x*tmp*z[j]*(1-z[j])))
+        grad_w2+=- np.dot(delta,z1.T)
+        
+        tmp=w2[:,0:n_hidden]
+        A= np.dot(delta.T, tmp).T
+        B= ((1-z)*z)
+        C= A*B
+        D= np.dot(C, x.T)
+        grad_w1+= -D
 
     
+    grad_w1/=training_data.shape[0]    
+    grad_w2/=training_data.shape[0]
+        
+ 
     #Make sure you reshape the gradient matrices to a 1D array. for instance if your gradient matrices are grad_w1 and grad_w2
     #you would use code similar to the one below to create a flat array
-    obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)/(training_data.shape[0])
+    obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
     obj_val/=training_data.shape[0]
-    print(obj_val)
     return (obj_val,obj_grad)
 
 
@@ -247,10 +226,11 @@ def nnPredict(w1,w2,data):
     
     
     
-    labels = np.zeros(data.shape[0]).reshape(data.shape[0], 1)
+    labels = np.zeros(data.shape[0]).reshape((data.shape[0], 1))
     for i in range(data.shape[0]):
         o=ff(w1,w2, data[i])
-        labels[i]=o.argmax()
+        labels[i]=np.argmax(o)
+
 
 
     #Your code here
