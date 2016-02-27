@@ -118,8 +118,8 @@ def preprocess():
     split = range(train_stack.shape[0])
     aperm = np.random.permutation(split)
 
-    train_stack_tdata = train_stack[aperm[0:10000],:]
-    train_stack_vdata = train_stack[aperm[10000:12000],:]
+    train_stack_tdata = train_stack[aperm[0:5],:]
+    train_stack_vdata = train_stack[aperm[5:10],:]
     
     #Your code here
     train_data = np.array(train_stack_tdata)[:,0:784]
@@ -184,7 +184,9 @@ def nnObjFunction(params, *args):
     n_input, n_hidden, n_class, training_data, training_label, lambdaval = args
     w1 = params[0:n_hidden * (n_input + 1)].reshape( (n_hidden, (n_input + 1)))
     w2 = params[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
-    
+
+    print(w1.shape)
+    print(train_data[0].shape)
     obj_val = 0  
     grad_w1 =  np.zeros(n_hidden*(n_input + 1)).reshape( (n_hidden, (n_input + 1)) ) 
     grad_w2 =  np.zeros(n_class  * (n_hidden +1 )).reshape((n_class, (n_hidden + 1)))
