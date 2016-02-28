@@ -3,7 +3,6 @@ from scipy.optimize import minimize
 from scipy.io import loadmat
 from math import sqrt, exp
 
-counter=0;
 
 def initializeWeights(n_in,n_out):
     """
@@ -36,6 +35,9 @@ def ff(w1, w2, p):
     o=step(w2, z)
     return(o)
 
+#we remove from the matrix all and only the columns that contain the same digit
+def featureSelection(M):
+    return(np.array(filter(lambda(x): min(x)!=max(x), zip(*M))).T)
 
 def preprocess():
     """ Input:
@@ -85,29 +87,35 @@ def preprocess():
         mat['test'+str(i)]=c
 
     train_stack=mat.get('train0')
+
     for i in range(1,10):
         temp123=mat.get('train'+str(i))
         train_stack=np.concatenate((train_stack,temp123),axis=0)
-  
-    test_stack=mat.get('test0')
 
-    for i in range(1,10):
+
+    for i in range(10):
         temp=mat.get('test'+str(i))
-        test_stack=np.concatenate((test_stack,temp),axis=0)
+        train_stack=np.concatenate((train_stack,temp),axis=0)
+        
+    train_stack=featureSelection(train_stack) #featureSelection
 
     split = range(train_stack.shape[0])
     aperm = np.random.permutation(split)
 
-    train_stack_tdata = train_stack[aperm[0:1000],:]
-    train_stack_vdata = train_stack[aperm[1000:1100],:]
+    train_stack_tdata = train_stack[aperm[0:50000],:]
+    train_stack_vdata = train_stack[aperm[50000:60000],:]
+    test_stack = train_stack[aperm[60000:],:]
     
     #Your code here
-    train_data = np.array(train_stack_tdata)[:,0:784]
-    train_label = np.array(train_stack_tdata)[:,784:]
-    validation_data = np.array(train_stack_vdata)[:,0:784]
-    validation_label =  np.array(train_stack_vdata)[:,784:]
-    test_data = np.array(test_stack)[:,0:784]
-    test_label = np.array(test_stack)[:,784:]
+
+    newFet=train_stack.shape[1]
+
+    train_data = np.array(train_stack_tdata)[:,0:newFet-1]
+    train_label = np.array(train_stack_tdata)[:,newFet-1:]
+    validation_data = np.array(train_stack_vdata)[:,0:newFet-1]
+    validation_label =  np.array(train_stack_vdata)[:,newFet-1:]
+    test_data = np.array(test_stack)[:,0:newFet-1]
+    test_label = np.array(test_stack)[:,newFet-1:]
     
     return train_data, train_label, validation_data, validation_label, test_data, test_label
     
@@ -122,9 +130,7 @@ def vectorize(v,nclasses):
         
 
 def nnObjFunction(params, *args):
-    global counter
-    counter+=1
-    print(counter)
+
     """% nnObjFunction computes the value of objective function (negative log 
     %   likelihood error function with regularization) given the parameters 
     %   of Neural Networks, thetraining data, their corresponding training 
@@ -182,7 +188,6 @@ def nnObjFunction(params, *args):
         x=np.vstack((x,1.0))
         
         delta=(y-o)*o*(1-o)
-
         grad_w2+=- np.dot(delta,z1.T)
         
         tmp=w2[:,0:n_hidden]
@@ -195,12 +200,18 @@ def nnObjFunction(params, *args):
     
     grad_w1/=training_data.shape[0]    
     grad_w2/=training_data.shape[0]
-        
- 
+    
+
+    grad_w1+=(lambdaval/training_data.shape[0])*(w1)
+    grad_w2+=(lambdaval/training_data.shape[0])*(w2)
     #Make sure you reshape the gradient matrices to a 1D array. for instance if your gradient matrices are grad_w1 and grad_w2
     #you would use code similar to the one below to create a flat array
     obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
     obj_val/=training_data.shape[0]
+    
+    obj_val+=lambdaval*(((w1*w1).sum())+((w2*w2).sum()))/(2*training_data.shape[0] )
+
+    
     return (obj_val,obj_grad)
 
 
@@ -266,7 +277,7 @@ initial_w2 = initializeWeights(n_hidden, n_class);
 initialWeights = np.concatenate((initial_w1.flatten(), initial_w2.flatten()),0)
 
 # set the regularization hyper-parameter
-lambdaval = 0;
+lambdaval = 0.5;
 
 
 args = (n_input, n_hidden, n_class, train_data, train_label, lambdaval)
@@ -284,7 +295,7 @@ print("end minimize")
 
 #Reshape nnParams from 1D vector into w1 and w2 matrices
 w1 = nn_params.x[0:n_hidden * (n_input + 1)].reshape( (n_hidden, (n_input + 1)))
-w2 = nn_params.x[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
+w2 = nn_params.x[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1))))
 
 #Test the computed parameters
 
