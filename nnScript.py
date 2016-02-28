@@ -37,7 +37,7 @@ def ff(w1, w2, p):
 
 #we remove from the matrix all and only the columns that contain the same digit
 def featureSelection(M):
-    return(np.array(filter(lambda(x): min(x)!=max(x), zip(*M))).T)
+    return(np.array(filter(lambda x: min(x)!=max(x), zip(*M))).T)
 
 def preprocess():
     """ Input:
@@ -295,7 +295,7 @@ print("end minimize")
 
 #Reshape nnParams from 1D vector into w1 and w2 matrices
 w1 = nn_params.x[0:n_hidden * (n_input + 1)].reshape( (n_hidden, (n_input + 1)))
-w2 = nn_params.x[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1))))
+w2 = nn_params.x[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
 
 #Test the computed parameters
 

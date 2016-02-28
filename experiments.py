@@ -164,7 +164,7 @@ def experiment():
             R[str(nH)+str(i)]=(lambdaval, (w1,w2), accTrainData, accValData, accTestData)
             print(R[str(nH)+str(i)])
             pl.dump(R, open("res.p", "wb")) #temporary save
-            i=1+1
+            i=i+1
     return R
 
 R=experiment()
