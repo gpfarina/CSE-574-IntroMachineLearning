@@ -1,0 +1,17 @@
+Skeleton report:
+1) Explain in words how we computed the values...explain in words the code in the main funciton of experiments.py
+2) To Mention: random initial weights have been computed at the beginning, once and for all. So all the rans of the loops start from the same initial random weights. This should not affect much the results because with enough data we usually converge independently by the initial starting point.
+3) To Mention: the random permutation of the data is done also once and for all. This means that division of the data in train/validation and test has been the same for all the rans of the loops and it also means that the final results are highly dependent on this permutation. (We might have obtained different results
+if we had an initial different random permutation ). We did not perform k-cross validaiton because we didnt have enough time. This experiment took about
+18 hours.
+
+PLOTS:
+one plot for every number of hidden nodes. 4,8,12,16,20
+for every plot:
+    - on the x axis we have lambda from 0 to 1 with steps of 1/10
+    - on the y axis we have accuracy in percentage. IN particular Three lines of different colors one for the accuracy on the training data, one for the accuracy
+    on teh validation data and one for the accuracy on the test data.
+At the right of every plot we should put teh lambda with the best performance considerin traininin data, validation and test.
+
+From this data in the end we select the lambda with the best test accuracy and say that with the respective number of nodes (probably 20)
+is the result of our experiment.
