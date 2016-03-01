@@ -15,3 +15,13 @@ At the right of every plot we should put teh lambda with the best performance co
 
 From this data in the end we select the lambda with the best test accuracy and say that with the respective number of nodes (probably 20)
 is the result of our experiment.
+
+to access the data in resFinal.p:
+from pyhon command line:
+import pickle as pl
+X=pl.load(open("resFinal.p", "rb"))
+now the data is in X
+u can access it like this:
+X['83']
+where 8 is the number of nodes and 3 is the fourth iteration of the inner loop so lambda is 3/10...
+
