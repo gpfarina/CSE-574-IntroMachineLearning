@@ -37,7 +37,7 @@ def ff(w1, w2, p):
 
 #we remove from the matrix all and only the columns that contain the same digit
 def featureSelection(M):
-    return(np.array(filter(lambda x: min(x)!=max(x), zip(*M))).T)
+    return(np.array([x for x in zip(*M) if min(x)!=max(x)]).T)
 
 def preprocess():
     """ Input:
@@ -264,7 +264,7 @@ print("preprocess done")
 n_input = train_data.shape[1]; 
 
 # set the number of nodes in hidden unit (not including bias unit)
-n_hidden = 4;
+n_hidden = 20;
 				   
 # set the number of nodes in output unit
 n_class = 10;				   
@@ -277,7 +277,7 @@ initial_w2 = initializeWeights(n_hidden, n_class);
 initialWeights = np.concatenate((initial_w1.flatten(), initial_w2.flatten()),0)
 
 # set the regularization hyper-parameter
-lambdaval = 0.5;
+lambdaval = 0.111;
 
 
 args = (n_input, n_hidden, n_class, train_data, train_label, lambdaval)
