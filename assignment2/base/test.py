@@ -46,8 +46,7 @@ def ldaLearn(X,y):
 
 
 def delta(k, means, covmat, x, prior):
-    return(np.exp(np.dot(np.dot(x.T, np.linalg.inv(covmat)), means[:,k-1]) - 0.5*np.dot(np.dot(means[:,k-1].T,np.linalg.inv(covmat)), means[:,k-1].reshape(2,1)) +np.log(prior)))
-    
+  return(np.dot(np.dot((x-means[:, k-1]).T,np.identity(2)),(x-means[:, k-1])))
     
 def ldaTest(means,covmat,Xtest,ytest):
     # Inputs
@@ -62,7 +61,7 @@ def ldaTest(means,covmat,Xtest,ytest):
     for j in range(Xtest.shape[0]):
         for i in range(1,6):
             d[i-1]=delta(i, means, covmat, Xtest[j], prior[i-1])
-        ypred[j]=np.argmax(d)+1
+        ypred[j]=np.argmin(d)+1
     
     acc=100.0*np.sum((ytest.flatten() == ypred).astype(float))/ytest.shape[0]
     # IMPLEMENT THIS METHOD
@@ -78,10 +77,10 @@ def main2():
     ldaacc,ypred = ldaTest(means,covmat,Xtest,ytest)
     print('LDA Accuracy = '+str(ldaacc))
   
-    clf = LDA()
-    clf.fit(X, np.ravel(y))
-    ypred2=clf.predict(Xtest)
-    print('LDA Accuracy = '+str(100*np.mean((ytest.flatten() == ypred2).astype(float))))
+    # clf = LDA()
+    # clf.fit(X, np.ravel(y))
+    # ypred2=clf.predict(Xtest)
+    # print('LDA Accuracy = '+str(100*np.mean((ytest.flatten() == ypred2).astype(float))))
 
 
 prior=np.zeros(5)

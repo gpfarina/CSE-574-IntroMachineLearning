@@ -44,7 +44,11 @@ def ldaLearn(X,y):
     return means.T,covmat
 
 def delta(k, means, covmat, x, prior):
-    return(np.dot(np.dot(x.T, np.linalg.inv(covmat)), means[:,k-1]) - 0.5*np.dot(np.dot(means[:,k-1].T,np.linalg.inv(covmat)), means[:,k-1].reshape(2,1)) +np.log(prior))
+    #we were doing x.T*sigma^-1 but we had to do (x-mu).T*sigma^-1
+    #it seems that the sigma we should use is a diagonal one, while the oen we get from the data IS NOT diagonal.
+    #a particular case of a diagonal matrix is a matrix of the form M=k*I in this case i set k=1  it wouldnt change for different values of k.
+    #but it does change if the entry in the fiagonal are different.
+   return(np.dot(np.dot((x-means[:, k-1]).T,np.identity(2)),(x-means[:, k-1])))
 
 def qdaLearn(X,y):
     # Inputs
@@ -72,7 +76,7 @@ def ldaTest(means,covmat,Xtest,ytest):
     for j in range(Xtest.shape[0]):
         for i in range(1,6):
             d[i-1]=delta(i, means, covmat, Xtest[j], prior[i-1])
-        ypred[j]=np.argmax(d)+1
+        ypred[j]=np.argmin(d)+1 #we take the minimum melhanobis distance which is exactly the same as the maximum Log likelihood
         
         
     acc=100*np.mean((ytest.flatten() == ypred).astype(float))
@@ -154,9 +158,10 @@ means,covmat = ldaLearn(X,y)
 ldaacc = ldaTest(means,covmat,Xtest,ytest)
 print('LDA Accuracy = '+str(ldaacc))
 # QDA
-means,covmats = qdaLearn(X,y)
-qdaacc = qdaTest(means,covmats,Xtest,ytest)
-print('QDA Accuracy = '+str(qdaacc))
+#we dont do qda fornow
+#means,covmats = qdaLearn(X,y)
+#qdaacc = qdaTest(means,covmats,Xtest,ytest)
+#print('QDA Accuracy = '+str(qdaacc))
 
 # plotting boundaries
 x1 = np.linspace(-5,20,100)
@@ -171,7 +176,7 @@ plt.contourf(x1,x2,zldares.reshape((x1.shape[0],x2.shape[0])))
 plt.scatter(Xtest[:,0],Xtest[:,1],c=ytest)
 
 plt.show()
-
+exit(0) #let's terminate here for now
 zacc,zqdares = qdaTest(means,covmats,xx,np.zeros((xx.shape[0],1)))
 plt.contourf(x1,x2,zqdares.reshape((x1.shape[0],x2.shape[0])))
 plt.scatter(Xtest[:,0],Xtest[:,1],c=ytest)
