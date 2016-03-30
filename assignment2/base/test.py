@@ -36,7 +36,8 @@ def ldaLearn(X,y):
     m5=np.mean(Z5, axis=0)
     m5=m5[:2]
     means=np.array([m1,m2,m3,m4,m5])
-    covmat=np.cov(Z[:2])
+    covmat=np.cov(Z[:,0:2].T) #this is the real covmat
+#    covmat=identity(2) #but with this we get better results
     prior[0]=np.float(Z1.shape[0])/np.float(Z.shape[0])
     prior[1]=np.float(Z2.shape[0])/np.float(Z.shape[0])
     prior[2]=np.float(Z3.shape[0])/np.float(Z.shape[0])
@@ -46,7 +47,8 @@ def ldaLearn(X,y):
 
 
 def delta(k, means, covmat, x, prior):
-  return(np.dot(np.dot((x-means[:, k-1]).T,np.identity(2)),(x-means[:, k-1])))
+  return(np.dot(np.dot((x-means[:, k-1]).T,np.linalg.solve(covmat, np.identity(2))),(x-means[:, k-1])))
+   # return(np.dot(means[:, k-1].T,x)-0.5*np.dot(means[:, k-1].T,means[:, k-1])+prior)
     
 def ldaTest(means,covmat,Xtest,ytest):
     # Inputs

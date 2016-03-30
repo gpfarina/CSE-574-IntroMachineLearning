@@ -35,7 +35,8 @@ def ldaLearn(X,y):
     m5=np.mean(Z5, axis=0)
     m5=m5[:2]
     means=np.array([m1,m2,m3,m4,m5])
-    covmat=np.cov(Z[:2])
+    covmat=np.cov(Z[:,0:2].T) #this is the real covmat
+#    covmat=identity(2) #but with this we get better results
     prior[0]=np.float(Z1.shape[0])/np.float(Z.shape[0])
     prior[1]=np.float(Z2.shape[0])/np.float(Z.shape[0])
     prior[2]=np.float(Z3.shape[0])/np.float(Z.shape[0])
@@ -48,7 +49,7 @@ def delta(k, means, covmat, x, prior):
     #it seems that the sigma we should use is a diagonal one, while the oen we get from the data IS NOT diagonal.
     #a particular case of a diagonal matrix is a matrix of the form M=k*I in this case i set k=1  it wouldnt change for different values of k.
     #but it does change if the entry in the fiagonal are different.
-   return(np.dot(np.dot((x-means[:, k-1]).T,np.identity(2)),(x-means[:, k-1])))
+   return(np.dot(np.dot((x-means[:, k-1]).T,covmat),(x-means[:, k-1])))
 
 def qdaLearn(X,y):
     # Inputs
