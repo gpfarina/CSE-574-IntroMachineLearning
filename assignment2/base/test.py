@@ -34,20 +34,19 @@ def ldaLearn(X,y):
     Z5=Z[Z[:, 2] == 5, :]
     m5=np.mean(Z5, axis=0)
     m5=m5[:2]
-    means=np.array(m1,m2,m3,m4,m5)
+    means=np.array([m1,m2,m3,m4,m5])
     covmat=np.cov(Z[:2])
     prior[0]=np.float(Z1.shape[0])/np.float(Z.shape[0])
     prior[1]=np.float(Z2.shape[0])/np.float(Z.shape[0])
     prior[2]=np.float(Z3.shape[0])/np.float(Z.shape[0])
     prior[3]=np.float(Z4.shape[0])/np.float(Z.shape[0])
     prior[4]=np.float(Z5.shape[0])/np.float(Z.shape[0])
-    return means,covmat
-
-
+    return means.T,covmat
 
 
 def delta(k, means, covmat, x, prior):
-    np.dot(np.dot(x.T, np.linalg.inv(covmat)), means[k-1])-0.5*np.dot(np.dot(means[k-1].T,np.linalg.inv(covmat)), means[k-1])+np.log(prior[k-1])
+    return(np.dot(np.dot(x.T, np.linalg.inv(covmat)), means[:,k-1]) - 0.5*np.dot(np.dot(means[:,k-1].T,np.linalg.inv(covmat)), means[:,k-1].reshape(2,1)) +np.log(prior))
+    
     
 def ldaTest(means,covmat,Xtest,ytest):
     # Inputs
@@ -57,20 +56,28 @@ def ldaTest(means,covmat,Xtest,ytest):
     # Outputs
     # acc - A scalar accuracy value
     # ypred - N x 1 column vector indicating the predicted labels
+    d=np.zeros(5)
+    ypred=np.zeros(ytest.shape[0])
     for j in range(Xtest.shape[0]):
         for i in range(1,6):
             d[i-1]=delta(i, means, covmat, Xtest[j], prior[i-1])
         ypred[j]=np.argmax(d)+1
+        
+        
+    acc=100*np.mean((ytest.flatten() == ypred).astype(float))
     # IMPLEMENT THIS METHOD
     return acc,ypred
 
 
-def main():
+def main2():
     if sys.version_info.major == 2:
         X,y,Xtest,ytest = pickle.load(open('sample.pickle','rb'))
     else:
         X,y,Xtest,ytest = pickle.load(open('sample.pickle','rb'),encoding = 'latin1')
-    prior=np.zeros(5)
     means,covmat = ldaLearn(X,y)
     ldaacc = ldaTest(means,covmat,Xtest,ytest)
     print('LDA Accuracy = '+str(ldaacc))
+
+prior=np.zeros(5)
+
+main2()
