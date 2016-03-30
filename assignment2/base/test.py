@@ -47,7 +47,7 @@ def ldaLearn(X,y):
 
 def delta(k, means, covmat, x, prior):
   return(np.dot(np.dot((x-means[:, k-1]).T,np.linalg.solve(covmat, covmat)),(x-means[:, k-1])))
-   # return(np.dot(means[:, k-1].T,x)-0.5*np.dot(means[:, k-1].T,means[:, k-1])+prior)
+   # return(np.dot(means[:, k-1].T,x)-0.5*np.dot(means[:, k-1].T,means[:, k-1])+np.log(prior))
     
 def ldaTest(means,covmat,Xtest,ytest):
     # Inputs

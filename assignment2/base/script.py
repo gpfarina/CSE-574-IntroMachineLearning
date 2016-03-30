@@ -48,8 +48,8 @@ def delta(k, means, covmat, x, prior):
     #it seems that the sigma we should use is a diagonal one, while the oen we get from the data IS NOT diagonal.
     #a particular case of a diagonal matrix is a matrix of the form M=k*I in this case i set k=1  it wouldnt change for different values of k.
     #but it does change if the entry in the fiagonal are different.
-   return(np.dot(np.dot((x-means[:, k-1]).T,covmat),(x-means[:, k-1])))
-#   return(np.dot(means[:, k-1].T,x)-0.5*np.dot(means[:, k-1].T,means[:, k-1])+prior)
+#   return(np.dot(np.dot((x-means[:, k-1]).T,covmat),(x-means[:, k-1])))
+   return(np.dot(means[:, k-1].T,x)-0.5*np.dot(means[:, k-1].T,means[:, k-1])+np.log(prior))
 def qdaLearn(X,y):
     # Inputs
     # X - a N x d matrix with each row corresponding to a training example
@@ -76,7 +76,7 @@ def ldaTest(means,covmat,Xtest,ytest):
     for j in range(Xtest.shape[0]):
         for i in range(1,6):
             d[i-1]=delta(i, means, covmat, Xtest[j], prior[i-1])
-        ypred[j]=np.argmin(d)+1 #we take the minimum melhanobis distance which is exactly the same as the maximum Log likelihood
+        ypred[j]=np.argmax(d)+1 #we take the minimum melhanobis distance which is exactly the same as the maximum Log likelihood
         
         
     acc=100*np.mean((ytest.flatten() == ypred).astype(float))
