@@ -36,20 +36,12 @@ def ldaLearn(X,y):
     m5=m5[:2]
     means=np.array([m1,m2,m3,m4,m5])
     covmat=np.cov(Z[:,0:2].T) #this is the real covmat
-    prior[0]=np.float(Z1.shape[0])/np.float(Z.shape[0])
-    prior[1]=np.float(Z2.shape[0])/np.float(Z.shape[0])
-    prior[2]=np.float(Z3.shape[0])/np.float(Z.shape[0])
-    prior[3]=np.float(Z4.shape[0])/np.float(Z.shape[0])
-    prior[4]=np.float(Z5.shape[0])/np.float(Z.shape[0])
     return means.T,covmat
 
-def delta(k, means, covmat, x, prior):
-    #we were doing x.T*sigma^-1 but we had to do (x-mu).T*sigma^-1
-    #it seems that the sigma we should use is a diagonal one, while the oen we get from the data IS NOT diagonal.
-    #a particular case of a diagonal matrix is a matrix of the form M=k*I in this case i set k=1  it wouldnt change for different values of k.
-    #but it does change if the entry in the fiagonal are different.
-   return(np.dot(np.dot((x-means[:, k-1]).T,covmat),(x-means[:, k-1])))
- #  return(np.dot(means[:, k-1].T,x)-0.5*np.dot(means[:, k-1].T,means[:, k-1])+np.log(prior))
+def delta(mean, covmat, x):
+    return(np.dot(np.dot((x-mean).T,np.linalg.solve(covmat, np.identity(2))),(x-mean)))
+
+
 def qdaLearn(X,y):
     # Inputs
     # X - a N x d matrix with each row corresponding to a training example
@@ -60,8 +52,30 @@ def qdaLearn(X,y):
     # covmats - A list of k d x d learnt covariance matrices for each of the k classes
     
     # IMPLEMENT THIS METHOD
-    
-    return means,covmats
+    Z=np.concatenate([X,y], axis=1)
+    Z1=Z[Z[:, 2] == 1, :]
+    m1=np.mean(Z1, axis=0)
+    c1=np.cov(Z1[:,0:2].T)
+    m1=m1[:2]
+    Z2=Z[Z[:, 2] == 2, :]
+    m2=np.mean(Z2, axis=0)
+    c2=np.cov(Z2[:,0:2].T)
+    m2=m2[:2]
+    Z3=Z[Z[:, 2] == 3, :]
+    m3=np.mean(Z3, axis=0)
+    c3=np.cov(Z3[:,0:2].T)
+    m3=m3[:2]
+    Z4=Z[Z[:, 2] == 4, :]
+    m4=np.mean(Z4, axis=0)
+    c4=np.cov(Z4[:,0:2].T)
+    m4=m4[:2]
+    Z5=Z[Z[:, 2] == 5, :]
+    m5=np.mean(Z5, axis=0)
+    c5=np.cov(Z5[:,0:2].T)
+    m5=m5[:2]
+    means=np.array([m1,m2,m3,m4,m5])
+    covmats=np.array([c1,c2,c3,c4,c5])
+    return means.T,covmats
     
 def ldaTest(means,covmat,Xtest,ytest):
     # Inputs
@@ -75,7 +89,7 @@ def ldaTest(means,covmat,Xtest,ytest):
     ypred=np.zeros(ytest.shape[0])
     for j in range(Xtest.shape[0]):
         for i in range(1,6):
-            d[i-1]=delta(i, means, covmat, Xtest[j], prior[i-1])
+            d[i-1]=delta(means[:, i-1], covmat, Xtest[j])
         ypred[j]=np.argmin(d)+1 #we take the minimum melhanobis distance which is exactly the same as the maximum Log likelihood
         
         
@@ -90,8 +104,14 @@ def qdaTest(means,covmats,Xtest,ytest):
     # Outputs
     # acc - A scalar accuracy value
     # ypred - N x 1 column vector indicating the predicted labels
-
+    d=np.zeros(5)
+    ypred=np.zeros(ytest.shape[0])
+    for j in range(Xtest.shape[0]):
+        for i in range(1,6):
+            d[i-1]=delta(means[:, i-1], covmats[i-1], Xtest[j])
+        ypred[j]=np.argmin(d)+1 
     # IMPLEMENT THIS METHOD
+    acc=100*np.mean((ytest.flatten() == ypred).astype(float))
     return acc,ypred
 
 def learnOLERegression(X,y):
@@ -100,8 +120,8 @@ def learnOLERegression(X,y):
     # y = N x 1                                                               
     # Output: 
     # w = d x 1                                                                
-    # IMPLEMENT THIS METHOD                                                   
-    return w
+    # IMPLEMENT THIS METHOD
+    return np.dot(np.dot(np.linalg.solve(np.dot(X.T, X), np.identity(X.shape[1])),X.T),y)
 
 def learnRidgeRegression(X,y,lambd):
     # Inputs:
@@ -111,7 +131,8 @@ def learnRidgeRegression(X,y,lambd):
     # Output:                                                                  
     # w = d x 1                                                                
 
-    # IMPLEMENT THIS METHOD                                                   
+    # IMPLEMENT THIS METHOD               
+    w=np.dot(np.linalg.solve(lambd*np.identity(65)+np.dot(X.T, X),np.identity(65)),np.dot(X.T,y))
     return w
 
 def testOLERegression(w,Xtest,ytest):
@@ -121,7 +142,8 @@ def testOLERegression(w,Xtest,ytest):
     # ytest = X x 1
     # Output:
     # rmse
-    
+    y=np.dot(Xtest, w)
+    rmse=np.sqrt(np.dot((ytest-np.dot(Xtest,w)).T,(ytest-np.dot(Xtest,w)))/Xtest.shape[0])
     # IMPLEMENT THIS METHOD
     return rmse
 
@@ -147,7 +169,6 @@ def mapNonLinear(x,p):
 
 # Problem 1
 # LDA
-prior=np.zeros(5)
 if sys.version_info.major == 2:
     X,y,Xtest,ytest = pickle.load(open('sample.pickle','rb'))
 else:
@@ -159,9 +180,9 @@ ldaacc = ldaTest(means,covmat,Xtest,ytest)
 print('LDA Accuracy = '+str(ldaacc))
 # QDA
 #we dont do qda fornow
-#means,covmats = qdaLearn(X,y)
-#qdaacc = qdaTest(means,covmats,Xtest,ytest)
-#print('QDA Accuracy = '+str(qdaacc))
+means,covmats = qdaLearn(X,y)
+qdaacc = qdaTest(means,covmats,Xtest,ytest)
+print('QDA Accuracy = '+str(qdaacc))
 
 # plotting boundaries
 x1 = np.linspace(-5,20,100)
@@ -172,14 +193,13 @@ xx[:,0] = xx1.ravel()
 xx[:,1] = xx2.ravel()
 
 zacc,zldares = ldaTest(means,covmat,xx,np.zeros((xx.shape[0],1)))
-plt.contourf(x1,x2,zldares.reshape((x1.shape[0],x2.shape[0])))
-plt.scatter(Xtest[:,0],Xtest[:,1],c=ytest)
+#plt.contourf(x1,x2,zldares.reshape((x1.shape[0],x2.shape[0])))
+#plt.scatter(Xtest[:,0],Xtest[:,1],c=ytest)
 
-plt.show()
-exit(0) #let's terminate here for now
+ #let's terminate here for now
 zacc,zqdares = qdaTest(means,covmats,xx,np.zeros((xx.shape[0],1)))
-plt.contourf(x1,x2,zqdares.reshape((x1.shape[0],x2.shape[0])))
-plt.scatter(Xtest[:,0],Xtest[:,1],c=ytest)
+#plt.contourf(x1,x2,zqdares.reshape((x1.shape[0],x2.shape[0])))
+#plt.scatter(Xtest[:,0],Xtest[:,1],c=ytest)
 
 # Problem 2
 
@@ -206,11 +226,13 @@ k = 101
 lambdas = np.linspace(0, 1, num=k)
 i = 0
 rmses3 = np.zeros((k,1))
+
 for lambd in lambdas:
     w_l = learnRidgeRegression(X_i,y,lambd)
     rmses3[i] = testOLERegression(w_l,Xtest_i,ytest)
     i = i + 1
 plt.plot(lambdas,rmses3)
+plt.show()
 
 # Problem 4
 k = 101
