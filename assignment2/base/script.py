@@ -142,7 +142,6 @@ def testOLERegression(w,Xtest,ytest):
     # ytest = X x 1
     # Output:
     # rmse
-    y=np.dot(Xtest, w)
     rmse=np.sqrt(np.dot((ytest-np.dot(Xtest,w)).T,(ytest-np.dot(Xtest,w)))/Xtest.shape[0])
     # IMPLEMENT THIS METHOD
     return rmse
@@ -153,8 +152,14 @@ def regressionObjVal(w, X, y, lambd):
     # to w (vector) for the given data X and y and the regularization parameter
     # lambda                                                                  
 
-    # IMPLEMENT THIS METHOD                                             
-    return error, error_grad
+    # IMPLEMENT THIS METHOD                     
+    w=w.reshape(65,1)
+    B=np.dot(np.dot(X.T, X),w).reshape(w.shape[0],1) 
+    C=(np.dot(X.T, y)+lambd*w).reshape(w.shape[0],1)
+    error_grad=B - C
+    A=(y-np.dot(X,w)).reshape(y.shape[0],1)
+    error=0.5*(np.dot(A.T, A )+lambd*np.dot(w.T, w))
+    return (error, error_grad.flatten())
 
 def mapNonLinear(x,p):
     # Inputs:                                                                  
@@ -193,14 +198,14 @@ xx[:,0] = xx1.ravel()
 xx[:,1] = xx2.ravel()
 
 zacc,zldares = ldaTest(means,covmat,xx,np.zeros((xx.shape[0],1)))
-#plt.contourf(x1,x2,zldares.reshape((x1.shape[0],x2.shape[0])))
-#plt.scatter(Xtest[:,0],Xtest[:,1],c=ytest)
-
+plt.contourf(x1,x2,zldares.reshape((x1.shape[0],x2.shape[0])))
+plt.scatter(Xtest[:,0],Xtest[:,1],c=ytest)
+plt.show()
  #let's terminate here for now
 zacc,zqdares = qdaTest(means,covmats,xx,np.zeros((xx.shape[0],1)))
-#plt.contourf(x1,x2,zqdares.reshape((x1.shape[0],x2.shape[0])))
-#plt.scatter(Xtest[:,0],Xtest[:,1],c=ytest)
-
+plt.contourf(x1,x2,zqdares.reshape((x1.shape[0],x2.shape[0])))
+plt.scatter(Xtest[:,0],Xtest[:,1],c=ytest)
+plt.show()
 # Problem 2
 
 if sys.version_info.major == 2:
@@ -230,10 +235,12 @@ rmses3 = np.zeros((k,1))
 for lambd in lambdas:
     w_l = learnRidgeRegression(X_i,y,lambd)
     rmses3[i] = testOLERegression(w_l,Xtest_i,ytest)
+    print(rmses3[i])
     i = i + 1
 plt.plot(lambdas,rmses3)
 plt.show()
 
+print("-----------")
 # Problem 4
 k = 101
 lambdas = np.linspace(0, 1, num=k)
@@ -247,10 +254,11 @@ for lambd in lambdas:
     w_l = np.transpose(np.array(w_l.x))
     w_l = np.reshape(w_l,[len(w_l),1])
     rmses4[i] = testOLERegression(w_l,Xtest_i,ytest)
+    print(rmses4[i])
     i = i + 1
 plt.plot(lambdas,rmses4)
 
-
+plt.show()
 # Problem 5
 pmax = 7
 lambda_opt = lambdas[np.argmin(rmses4)]
