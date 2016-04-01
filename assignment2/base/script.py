@@ -155,10 +155,11 @@ def regressionObjVal(w, X, y, lambd):
     # IMPLEMENT THIS METHOD                     
     w=w.reshape(65,1)
     B=np.dot(np.dot(X.T, X),w).reshape(w.shape[0],1) 
-    C=(np.dot(X.T, y)+lambd*w).reshape(w.shape[0],1)
+    C=(np.dot(X.T, y)-lambd*w).reshape(w.shape[0],1)
     error_grad=B - C
     A=(y-np.dot(X,w)).reshape(y.shape[0],1)
     error=0.5*(np.dot(A.T, A )+lambd*np.dot(w.T, w))
+
     return (error, error_grad.flatten())
 
 def mapNonLinear(x,p):
