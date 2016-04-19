@@ -32,7 +32,6 @@ def preprocess():
         n_sample = n_sample + mat.get("train" + str(i)).shape[0]
     n_validation = 1000
     n_train = n_sample - 10 * n_validation
-
     # Construct validation data
     validation_data = np.zeros((10 * n_validation, n_feature))
     for i in range(10):
@@ -110,6 +109,16 @@ def blrObjFunction(initialWeights, *args):
     error = 0
     error_grad = np.zeros((n_features + 1, 1))
 
+    bias=np.ones((n_data,1))
+    train_data=np.hstack((bias,train_data))
+    initialWeights=initialWeights.reshape((initialWeights.shape[0],1))
+    theta=(sigmoid(np.dot(train_data, initialWeights)))
+    theta=theta.reshape((theta.shape[0],1))
+  
+    error=-(np.sum(np.multiply(np.log(theta), labeli) + np.multiply(np.log(1.0-theta), 1.0-labeli))/(n_data))
+    tmp=np.multiply(theta-labeli, train_data)
+    error_grad=tmp.sum(axis=0)/n_data
+    
     ##################
     # YOUR CODE HERE #
     ##################
@@ -134,12 +143,16 @@ def blrPredict(W, data):
 
     """
     label = np.zeros((data.shape[0], 1))
-
+    n_data=data.shape[0]
+    bias=np.ones((n_data,1))
+    data=np.hstack((bias,data))
+    tmp=sigmoid(np.dot(data, W))
+    label=tmp.argmax(axis=1)
     ##################
     # YOUR CODE HERE #
     ##################
     # HINT: Do not forget to add the bias term to your input data
-
+    label=label.reshape((label.shape[0],1))
     return label
 
 
