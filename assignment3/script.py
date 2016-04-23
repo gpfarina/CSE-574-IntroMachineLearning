@@ -224,31 +224,31 @@ n_train = train_data.shape[0]
 # number of features
 n_feature = train_data.shape[1]
 
-Y = np.zeros((n_train, n_class))
-for i in range(n_class):
-    Y[:, i] = (train_label == i).astype(int).ravel()
+# Y = np.zeros((n_train, n_class))
+# for i in range(n_class):
+#     Y[:, i] = (train_label == i).astype(int).ravel()
 
-# Logistic Regression with Gradient Descent
-W = np.zeros((n_feature + 1, n_class))
-initialWeights = np.zeros((n_feature + 1, 1))
-opts = {'maxiter': 100}
-for i in range(n_class):
-    labeli = Y[:, i].reshape(n_train, 1)
-    args = (train_data, labeli)
-    nn_params = minimize(blrObjFunction, initialWeights, jac=True, args=args, method='CG', options=opts)
-    W[:, i] = nn_params.x.reshape((n_feature + 1,))
+# # Logistic Regression with Gradient Descent
+# W = np.zeros((n_feature + 1, n_class))
+# initialWeights = np.zeros((n_feature + 1, 1))
+# opts = {'maxiter': 100}
+# for i in range(n_class):
+#     labeli = Y[:, i].reshape(n_train, 1)
+#     args = (train_data, labeli)
+#     nn_params = minimize(blrObjFunction, initialWeights, jac=True, args=args, method='CG', options=opts)
+#     W[:, i] = nn_params.x.reshape((n_feature + 1,))
 
-# Find the accuracy on Training Dataset
-predicted_label = blrPredict(W, train_data)
-print('\n Training set Accuracy:' + str(100 * np.mean((predicted_label == train_label).astype(float))) + '%')
+# # Find the accuracy on Training Dataset
+# predicted_label = blrPredict(W, train_data)
+# print('\n Training set Accuracy:' + str(100 * np.mean((predicted_label == train_label).astype(float))) + '%')
 
-# Find the accuracy on Validation Dataset
-predicted_label = blrPredict(W, validation_data)
-print('\n Validation set Accuracy:' + str(100 * np.mean((predicted_label == validation_label).astype(float))) + '%')
+# # Find the accuracy on Validation Dataset
+# predicted_label = blrPredict(W, validation_data)
+# print('\n Validation set Accuracy:' + str(100 * np.mean((predicted_label == validation_label).astype(float))) + '%')
 
-# Find the accuracy on Testing Dataset
-predicted_label = blrPredict(W, test_data)
-print('\n Testing set Accuracy:' + str(100 * np.mean((predicted_label == test_label).astype(float))) + '%')
+# # Find the accuracy on Testing Dataset
+# predicted_label = blrPredict(W, test_data)
+# print('\n Testing set Accuracy:' + str(100 * np.mean((predicted_label == test_label).astype(float))) + '%')
 
 """
 Script for Support Vector Machine
@@ -258,7 +258,48 @@ print('\n\n--------------SVM-------------------\n\n')
 ##################
 # YOUR CODE HERE #
 ##################
+from sklearn.svm import SVC
+import pickle as pl
+train_label=train_label.ravel()
 
+clf = SVC(kernel='linear')
+clf.fit(train_data, train_label) 
+predicted_labels_svm1=clf.predict(test_data)
+predicted_labels_svm1=predicted_labels_svm1.reshape((predicted_labels_svm1.shape[0],1))
+acc_1=(100 * np.mean((predicted_labels_svm1 == test_label).astype(float)))
+print("1)")
+print(acc_1)
+pl.dump(acc_1, open("accuracies1", "wb"))
+#clf = SVC(gamma=1)
+#clf.fit(train_data, train_label)
+#predicted_labels_svm2=clf.predict(test_data)
+#predicted_labels_svm2=predicted_labels_svm2.reshape((predicted_labels_svm2.shape[0],1))
+#acc_2=(100 * np.mean((predicted_labels_svm2 == test_label).astype(float)))
+#print("2)")
+#print(acc_2)
+#pl.dump(acc_2, open("accuracies2", "wb"))
+clf = SVC()
+clf.fit(train_data, train_label)
+predicted_labels_svm3=clf.predict(test_data)
+predicted_labels_svm3=predicted_labels_svm3.reshape((predicted_labels_svm3.shape[0],1))
+acc_3=(100 * np.mean((predicted_labels_svm1 == test_label).astype(float)))
+print("3)")
+print(acc_3)
+pl.dump(acc_3, open("accuraciesGe3", "wb"))
+acc=np.zeros(10)
+for i in np.arange(10,110,10):
+    clf = SVC(C=i)
+    clf.fit(train_data, train_label)
+    pred=clf.predict(test_data)
+    pred=pred.reshape((pred.shape[0],1))
+    acc[(i/10)-1]=(100 * np.mean((pred == test_label).astype(float)))
+    print(str(i)+")")
+    print(acc[(i/10)-1])
+    
+    
+newacc=np.concatenate((np.array(acc_3), acc), axis=0)
+
+pl.dump(newacc, open("accuraciesGen", "wb"))
 
 """
 Script for Extra Credit Part
