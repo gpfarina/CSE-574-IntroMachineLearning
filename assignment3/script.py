@@ -162,7 +162,7 @@ def mlrObjFunction(params, *args):
     its gradient.
 
     Input:
-        initialWeights: the weight vector of size (D + 1) x 1
+        initialWeights: the weight vector of size (D + 1) x 10 
         train_data: the data matrix of size N x D
         labeli: the label vector of size N x 1 where each entry can be either 0 or 1
                 representing the label of corresponding feature vector
@@ -172,16 +172,31 @@ def mlrObjFunction(params, *args):
         error_grad: the vector of size (D+1) x 10 representing the gradient of
                     error function
     """
+    train_data, Y = args
+    n_class=10
     n_data = train_data.shape[0]
     n_feature = train_data.shape[1]
+    initialWeights=params[0:(n_feature + 1)* n_class].reshape( (n_feature + 1), n_class)
+    
     error = 0
     error_grad = np.zeros((n_feature + 1, n_class))
-
+    
     ##################
     # YOUR CODE HERE #
     ##################
     # HINT: Do not forget to add the bias term to your input data
-
+    bias=np.ones((n_data,1))
+    train_data=np.hstack((bias,train_data))
+    tmp=np.exp(np.dot(train_data,initialWeights))
+    d=np.sum(tmp, axis=1)
+    d=d.reshape((d.shape[0],1))
+    theta=np.divide(tmp,d)
+    Z=theta-Y
+    R=np.dot(Z.T, train_data)
+    error_grad=(R.T)/train_data.shape[0]
+    lnt=np.log(theta)
+    error=-np.sum(np.sum(np.multiply(lnt, Y), axis=1),axis=0)/train_data.shape[0]
+    error_grad=error_grad.flatten()
     return error, error_grad
 
 
@@ -201,12 +216,16 @@ def mlrPredict(W, data):
 
     """
     label = np.zeros((data.shape[0], 1))
-
+    
+    bias=np.ones((data.shape[0],1))
+    data=np.hstack((bias,data))
+    tmp=np.exp(np.dot(data, W))
+    label=tmp.argmax(axis=1)
     ##################
     # YOUR CODE HERE #
     ##################
     # HINT: Do not forget to add the bias term to your input data
-
+    label=label.reshape((label.shape[0],1))
     return label
 
 
@@ -224,9 +243,9 @@ n_train = train_data.shape[0]
 # number of features
 n_feature = train_data.shape[1]
 
-# Y = np.zeros((n_train, n_class))
-# for i in range(n_class):
-#     Y[:, i] = (train_label == i).astype(int).ravel()
+Y = np.zeros((n_train, n_class))
+for i in range(n_class):
+    Y[:, i] = (train_label == i).astype(int).ravel()
 
 # # Logistic Regression with Gradient Descent
 # W = np.zeros((n_feature + 1, n_class))
@@ -250,56 +269,56 @@ n_feature = train_data.shape[1]
 # predicted_label = blrPredict(W, test_data)
 # print('\n Testing set Accuracy:' + str(100 * np.mean((predicted_label == test_label).astype(float))) + '%')
 
-"""
-Script for Support Vector Machine
-"""
+# """
+# Script for Support Vector Machine
+# """
 
-print('\n\n--------------SVM-------------------\n\n')
-##################
-# YOUR CODE HERE #
-##################
-from sklearn.svm import SVC
-import pickle as pl
-train_label=train_label.ravel()
+# print('\n\n--------------SVM-------------------\n\n')
+# ##################
+# # YOUR CODE HERE #
+# ##################
+# from sklearn.svm import SVC
+# import pickle as pl
+# train_label=train_label.ravel()
 
-clf = SVC(kernel='linear')
-clf.fit(train_data, train_label) 
-predicted_labels_svm1=clf.predict(test_data)
-predicted_labels_svm1=predicted_labels_svm1.reshape((predicted_labels_svm1.shape[0],1))
-acc_1=(100 * np.mean((predicted_labels_svm1 == test_label).astype(float)))
-print("1)")
-print(acc_1)
-pl.dump(acc_1, open("accuracies1", "wb"))
-#clf = SVC(gamma=1)
-#clf.fit(train_data, train_label)
-#predicted_labels_svm2=clf.predict(test_data)
-#predicted_labels_svm2=predicted_labels_svm2.reshape((predicted_labels_svm2.shape[0],1))
-#acc_2=(100 * np.mean((predicted_labels_svm2 == test_label).astype(float)))
-#print("2)")
-#print(acc_2)
-#pl.dump(acc_2, open("accuracies2", "wb"))
-clf = SVC()
-clf.fit(train_data, train_label)
-predicted_labels_svm3=clf.predict(test_data)
-predicted_labels_svm3=predicted_labels_svm3.reshape((predicted_labels_svm3.shape[0],1))
-acc_3=(100 * np.mean((predicted_labels_svm1 == test_label).astype(float)))
-print("3)")
-print(acc_3)
-pl.dump(acc_3, open("accuraciesGe3", "wb"))
-acc=np.zeros(10)
-for i in np.arange(10,110,10):
-    clf = SVC(C=i)
-    clf.fit(train_data, train_label)
-    pred=clf.predict(test_data)
-    pred=pred.reshape((pred.shape[0],1))
-    acc[(i/10)-1]=(100 * np.mean((pred == test_label).astype(float)))
-    print(str(i)+")")
-    print(acc[(i/10)-1])
+# clf = SVC(kernel='linear')
+# clf.fit(train_data, train_label) 
+# predicted_labels_svm1=clf.predict(test_data)
+# predicted_labels_svm1=predicted_labels_svm1.reshape((predicted_labels_svm1.shape[0],1))
+# acc_1=(100 * np.mean((predicted_labels_svm1 == test_label).astype(float)))
+# print("1)")
+# print(acc_1)
+# pl.dump(acc_1, open("accuracies1", "wb"))
+# clf = SVC(gamma=1)
+# clf.fit(train_data, train_label)
+# predicted_labels_svm2=clf.predict(test_data)
+# predicted_labels_svm2=predicted_labels_svm2.reshape((predicted_labels_svm2.shape[0],1))
+# acc_2=(100 * np.mean((predicted_labels_svm2 == test_label).astype(float)))
+# print("2)")
+# print(acc_2)
+# pl.dump(acc_2, open("accuracies2", "wb"))
+# clf = SVC()
+# clf.fit(train_data, train_label)
+# predicted_labels_svm3=clf.predict(test_data)
+# predicted_labels_svm3=predicted_labels_svm3.reshape((predicted_labels_svm3.shape[0],1))
+# acc_3=(100 * np.mean((predicted_labels_svm1 == test_label).astype(float)))
+# print("3)")
+# print(acc_3)
+# pl.dump(acc_3, open("accuraciesGe3", "wb"))
+# acc=np.zeros(10)
+# for i in np.arange(10,110,10):
+#     clf = SVC(C=i)
+#     clf.fit(train_data, train_label)
+#     pred=clf.predict(test_data)
+#     pred=pred.reshape((pred.shape[0],1))
+#     acc[(i/10)-1]=(100 * np.mean((pred == test_label).astype(float)))
+#     print(str(i)+")")
+#     print(acc[(i/10)-1])
     
     
-newacc=np.concatenate((np.array(acc_3), acc), axis=0)
+# newacc=np.concatenate((np.array(acc_3), acc), axis=0)
 
-pl.dump(newacc, open("accuraciesGen", "wb"))
+# pl.dump(newacc, open("accuraciesGen", "wb"))
 
 """
 Script for Extra Credit Part
