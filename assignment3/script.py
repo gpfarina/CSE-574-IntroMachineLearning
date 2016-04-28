@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.io import loadmat
 from scipy.optimize import minimize
-
+import pickle as pl
 
 def preprocess():
     """ 
@@ -248,110 +248,117 @@ for i in range(n_class):
     Y[:, i] = (train_label == i).astype(int).ravel()
 
 # # Logistic Regression with Gradient Descent
-# W = np.zeros((n_feature + 1, n_class))
-# initialWeights = np.zeros((n_feature + 1, 1))
-# opts = {'maxiter': 100}
-# for i in range(n_class):
-#     labeli = Y[:, i].reshape(n_train, 1)
-#     args = (train_data, labeli)
-#     nn_params = minimize(blrObjFunction, initialWeights, jac=True, args=args, method='CG', options=opts)
-#     W[:, i] = nn_params.x.reshape((n_feature + 1,))
+#W = np.zeros((n_feature + 1, n_class))
+#initialWeights = np.zeros((n_feature + 1, 1))
+#opts = {'maxiter': 100}
+#for i in range(n_class):
+#    labeli = Y[:, i].reshape(n_train, 1)
+#    args = (train_data, labeli)
+#    nn_params = minimize(blrObjFunction, initialWeights, jac=True, args=args, method='CG', options=opts)
+#    W[:, i] = nn_params.x.reshape((n_feature + 1,))
 
 # # Find the accuracy on Training Dataset
-# predicted_label = blrPredict(W, train_data)
-# print('\n Training set Accuracy:' + str(100 * np.mean((predicted_label == train_label).astype(float))) + '%')
+#predicted_label = blrPredict(W, train_data)
+#blrTrain=100 * np.mean((predicted_label == train_label).astype(float))
+#print('\n Training set Accuracy:' + str(100 * np.mean((predicted_label == train_label).astype(float))) + '%')
 
 # # Find the accuracy on Validation Dataset
-# predicted_label = blrPredict(W, validation_data)
-# print('\n Validation set Accuracy:' + str(100 * np.mean((predicted_label == validation_label).astype(float))) + '%')
+#predicted_label = blrPredict(W, validation_data)
+#blrVal=np.mean((predicted_label == validation_label).astype(float))
+#print('\n Validation set Accuracy:' + str(100 * np.mean((predicted_label == validation_label).astype(float))) + '%')
 
 # # Find the accuracy on Testing Dataset
-# predicted_label = blrPredict(W, test_data)
-# print('\n Testing set Accuracy:' + str(100 * np.mean((predicted_label == test_label).astype(float))) + '%')
+#predicted_label = blrPredict(W, test_data)
+#blrTest=100 * np.mean((predicted_label == test_label).astype(float))
+#print('\n Testing set Accuracy:' + str(100 * np.mean((predicted_label == test_label).astype(float))) + '%')
+
+#accLogReg=np.array([blrTest, blrVal, blrTrain])
+
+#pl.dump(accLogReg, open('accLogReg', 'wb'))
 
 # """
 # Script for Support Vector Machine
 # """
 
-print('\n\n--------------SVM-------------------\n\n')
+#print('\n\n--------------SVM-------------------\n\n')
 ##################
 # YOUR CODE HERE #
 ##################
 from sklearn.svm import SVC
-import pickle as pl
 train_label=train_label.ravel()
 
 
-clf = SVC(kernel='linear')
-clf.fit(train_data, train_label)
-predicted_test_labels_1=clf.predict(test_data)
-predicted_test_labels_1=predicted_test_labels_1.reshape((predicted_test_labels_1.shape[0],1))
-predicted_train_labels_1=clf.predict(train_data)
-predicted_train_labels_1=predicted_train_labels_1.reshape((predicted_train_labels_1.shape[0],1))
-predicted_val_labels_1=clf.predict(validation_data)
-predicted_val_labels_1=predicted_val_labels_1.reshape((predicted_val_labels_1.shape[0],1))
+#clf = SVC(kernel='linear')
+#clf.fit(train_data, train_label)
+#predicted_test_labels_1=clf.predict(test_data)
+#predicted_test_labels_1=predicted_test_labels_1.reshape((predicted_test_labels_1.shape[0],1))
+#predicted_train_labels_1=clf.predict(train_data)
+#predicted_train_labels_1=predicted_train_labels_1.reshape((predicted_train_labels_1.shape[0],1))
+#predicted_val_labels_1=clf.predict(validation_data)
+#predicted_val_labels_1=predicted_val_labels_1.reshape((predicted_val_labels_1.shape[0],1))
 
-acc_test1=(100 * np.mean((predicted_test_labels_1 == test_label).astype(float)))
-acc_val1=(100 * np.mean((predicted_val_labels_1 == validation_label).astype(float)))
-acc_train1=(100 * np.mean(((predicted_train_labels_1.ravel()) == train_label).astype(float)))
-dump1=np.array([acc_test1, acc_val1, acc_train1])
-pl.dump(dump1, open("acc1", "wb"))
+#acc_test1=(100 * np.mean((predicted_test_labels_1 == test_label).astype(float)))
+#acc_val1=(100 * np.mean((predicted_val_labels_1 == validation_label).astype(float)))
+#acc_train1=(100 * np.mean(((predicted_train_labels_1.ravel()) == train_label).astype(float)))
+#dump1=np.array([acc_test1, acc_val1, acc_train1])
+#pl.dump(dump1, open("acc1", "wb"))
 
 
-clf = SVC(gamma=1)
-clf.fit(train_data, train_label)
-predicted_test_labels_2=clf.predict(test_data)
-predicted_test_labels_2=predicted_test_labels_2.reshape((predicted_test_labels_2.shape[0],1))
-predicted_train_labels_2=clf.predict(train_data)
-predicted_train_labels_2=predicted_train_labels_2.reshape((predicted_train_labels_2.shape[0],1))
-predicted_val_labels_2=clf.predict(validation_data)
-predicted_val_labels_2=predicted_val_labels_2.reshape((predicted_val_labels_2.shape[0],1))
+#clf = SVC(gamma=1)
+#clf.fit(train_data, train_label)
+#predicted_test_labels_2=clf.predict(test_data)
+#predicted_test_labels_2=predicted_test_labels_2.reshape((predicted_test_labels_2.shape[0],1))
+#predicted_train_labels_2=clf.predict(train_data)
+#predicted_train_labels_2=predicted_train_labels_2.reshape((predicted_train_labels_2.shape[0],1))
+#predicted_val_labels_2=clf.predict(validation_data)
+#predicted_val_labels_2=predicted_val_labels_2.reshape((predicted_val_labels_2.shape[0],1))
 
-acc_test2=(100 * np.mean((predicted_test_labels_2 == test_label).astype(float)))
-acc_val2=(100 * np.mean((predicted_val_labels_2 == validation_label).astype(float)))
-acc_train2=(100 * np.mean(((predicted_train_labels_2.ravel()) == train_label).astype(float)))
-dump2=np.array([acc_test2, acc_val2, acc_train2])
-pl.dump(dump2, open("acc2", "wb"))
+#acc_test2=(100 * np.mean((predicted_test_labels_2 == test_label).astype(float)))
+#acc_val2=(100 * np.mean((predicted_val_labels_2 == validation_label).astype(float)))
+#acc_train2=(100 * np.mean(((predicted_train_labels_2.ravel()) == train_label).astype(float)))
+#dump2=np.array([acc_test2, acc_val2, acc_train2])
+#pl.dump(dump2, open("acc2", "wb"))
 
-clf = SVC()
-clf.fit(train_data, train_label)
-predicted_test_labels_3=clf.predict(test_data)
-predicted_test_labels_3=predicted_test_labels_3.reshape((predicted_test_labels_3.shape[0],1))
-predicted_train_labels_3=clf.predict(train_data)
-predicted_train_labels_3=predicted_train_labels_3.reshape((predicted_train_labels_3.shape[0],1))
-predicted_val_labels_3=clf.predict(validation_data)
-predicted_val_labels_3=predicted_val_labels_3.reshape((predicted_val_labels_3.shape[0],1))
+#clf = SVC()
+#clf.fit(train_data, train_label)
+#predicted_test_labels_3=clf.predict(test_data)
+#predicted_test_labels_3=predicted_test_labels_3.reshape((predicted_test_labels_3.shape[0],1))
+#predicted_train_labels_3=clf.predict(train_data)
+#predicted_train_labels_3=predicted_train_labels_3.reshape((predicted_train_labels_3.shape[0],1))
+#predicted_val_labels_3=clf.predict(validation_data)
+#predicted_val_labels_3=predicted_val_labels_3.reshape((predicted_val_labels_3.shape[0],1))
 
-acc_test3=(100 * np.mean((predicted_test_labels_3 == test_label).astype(float)))
-acc_val3=(100 * np.mean((predicted_val_labels_3 == validation_label).astype(float)))
-acc_train3=(100 * np.mean(((predicted_train_labels_3.ravel()) == train_label).astype(float)))
-dump3=np.array([acc_test3, acc_val3, acc_train3])
-pl.dump(dump3, open("acc3", "wb"))
+#acc_test3=(100 * np.mean((predicted_test_labels_3 == test_label).astype(float)))
+#acc_val3=(100 * np.mean((predicted_val_labels_3 == validation_label).astype(float)))
+#acc_train3=(100 * np.mean(((predicted_train_labels_3.ravel()) == train_label).astype(float)))
+#dump3=np.array([acc_test3, acc_val3, acc_train3])
+#pl.dump(dump3, open("acc3", "wb"))
 
-acc_test=np.zeros(10)
-acc_train=np.zeros(10)
-acc_val=np.zeros(10)
-for i in np.arange(10,110,10):
-   clf = SVC(C=i)
-   clf.fit(train_data, train_label)
-   predicted_test_labels=clf.predict(test_data)
-   predicted_test_labels=predicted_test_labels.reshape((predicted_test_labels.shape[0],1))
-   predicted_train_labels=clf.predict(train_data)
-   predicted_train_labels=predicted_train_labels.reshape((predicted_train_labels.shape[0],1))
-   predicted_val_labels=clf.predict(validation_data)
-   predicted_val_labels=predicted_val_labels.reshape((predicted_val_labels.shape[0],1))
-   acc_test[(i/10)-1]   = (100 * np.mean((predicted_test_labels    ==   test_label).astype(float)))
-   acc_val[(i/10)-1]     = (100 * np.mean((predicted_val_labels    ==    validation_label).astype(float)))
-   acc_train[(i/10)-1]  = (100 * np.mean(((predicted_train_labels.ravel())  == train_label).astype(float)))
+#acc_test=np.zeros(10)
+#acc_train=np.zeros(10)
+#acc_val=np.zeros(10)
+#for i in np.arange(10,110,10):
+#   clf = SVC(C=i)
+#   clf.fit(train_data, train_label)
+#   predicted_test_labels=clf.predict(test_data)
+#   predicted_test_labels=predicted_test_labels.reshape((predicted_test_labels.shape[0],1))
+#   predicted_train_labels=clf.predict(train_data)
+#   predicted_train_labels=predicted_train_labels.reshape((predicted_train_labels.shape[0],1))
+#   predicted_val_labels=clf.predict(validation_data)
+#   predicted_val_labels=predicted_val_labels.reshape((predicted_val_labels.shape[0],1))
+#   acc_test[(i/10)-1]   = (100 * np.mean((predicted_test_labels    ==   test_label).astype(float)))
+#   acc_val[(i/10)-1]     = (100 * np.mean((predicted_val_labels    ==    validation_label).astype(float)))
+#   acc_train[(i/10)-1]  = (100 * np.mean(((predicted_train_labels.ravel())  == train_label).astype(float)))
    
-dumpLoop=np.array([acc_test, acc_val, acc_train])
-pl.dump(dumpLoop, open("accLoop", "wb"))
+#dumpLoop=np.array([acc_test, acc_val, acc_train])
+#pl.dump(dumpLoop, open("accLoop", "wb"))
 
 
 """
 Script for Extra Credit Part
 """
 # FOR EXTRA CREDIT ONLY
+print("start")
 W_b = np.zeros((n_feature + 1, n_class))
 initialWeights_b = np.zeros((n_feature + 1, n_class))
 opts_b = {'maxiter': 100}
@@ -362,12 +369,18 @@ W_b = nn_params.x.reshape((n_feature + 1, n_class))
 
 # Find the accuracy on Training Dataset
 predicted_label_b = mlrPredict(W_b, train_data)
-print('\n Training set Accuracy:' + str(100 * np.mean((predicted_label_b == train_label).astype(float))) + '%')
+trainA=100 * np.mean(((predicted_label_b.ravel()) == train_label).astype(float))
+print('\n Training set Accuracy:' + str(100 * np.mean(((predicted_label_b.ravel()) == train_label).astype(float))) + '%')
 
 # Find the accuracy on Validation Dataset
 predicted_label_b = mlrPredict(W_b, validation_data)
+valA=100 * np.mean((predicted_label_b == validation_label).astype(float))
 print('\n Validation set Accuracy:' + str(100 * np.mean((predicted_label_b == validation_label).astype(float))) + '%')
 
 # Find the accuracy on Testing Dataset
 predicted_label_b = mlrPredict(W_b, test_data)
+testA=100 * np.mean((predicted_label_b == test_label).astype(float))
 print('\n Testing set Accuracy:' + str(100 * np.mean((predicted_label_b == test_label).astype(float))) + '%')
+
+mlrLogReg=np.array([testA, valA, trainA])
+pl.dump(mlrLogReg, open('accF', 'wb'))
