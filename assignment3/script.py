@@ -264,7 +264,7 @@ print('\n Training set Accuracy:' + str(100 * np.mean((predicted_label == train_
 
 # Find the accuracy on Validation Dataset
 predicted_label = blrPredict(W, validation_data)
-blrVal=np.mean((predicted_label == validation_label).astype(float))
+blrVal=100*np.mean((predicted_label == validation_label).astype(float))
 print('\n Validation set Accuracy:' + str(100 * np.mean((predicted_label == validation_label).astype(float))) + '%')
 
 # Find the accuracy on Testing Dataset
@@ -272,9 +272,6 @@ predicted_label = blrPredict(W, test_data)
 blrTest=100 * np.mean((predicted_label == test_label).astype(float))
 print('\n Testing set Accuracy:' + str(100 * np.mean((predicted_label == test_label).astype(float))) + '%')
 
-accLogReg=np.array([blrTest, blrVal, blrTrain])
-
-pl.dump(accLogReg, open('accLogReg', 'wb'))
 
 # """
 # Script for Support Vector Machine
@@ -300,9 +297,6 @@ predicted_val_labels_1=predicted_val_labels_1.reshape((predicted_val_labels_1.sh
 acc_test1=(100 * np.mean((predicted_test_labels_1 == test_label).astype(float)))
 acc_val1=(100 * np.mean((predicted_val_labels_1 == validation_label).astype(float)))
 acc_train1=(100 * np.mean(((predicted_train_labels_1.ravel()) == train_label).astype(float)))
-dump1=np.array([acc_test1, acc_val1, acc_train1])
-pl.dump(dump1, open("acc1", "wb"))
-
 
 clf = SVC(gamma=1)
 clf.fit(train_data, train_label)
@@ -316,8 +310,6 @@ predicted_val_labels_2=predicted_val_labels_2.reshape((predicted_val_labels_2.sh
 acc_test2=(100 * np.mean((predicted_test_labels_2 == test_label).astype(float)))
 acc_val2=(100 * np.mean((predicted_val_labels_2 == validation_label).astype(float)))
 acc_train2=(100 * np.mean(((predicted_train_labels_2.ravel()) == train_label).astype(float)))
-dump2=np.array([acc_test2, acc_val2, acc_train2])
-pl.dump(dump2, open("acc2", "wb"))
 
 clf = SVC()
 clf.fit(train_data, train_label)
@@ -331,8 +323,6 @@ predicted_val_labels_3=predicted_val_labels_3.reshape((predicted_val_labels_3.sh
 acc_test3=(100 * np.mean((predicted_test_labels_3 == test_label).astype(float)))
 acc_val3=(100 * np.mean((predicted_val_labels_3 == validation_label).astype(float)))
 acc_train3=(100 * np.mean(((predicted_train_labels_3.ravel()) == train_label).astype(float)))
-dump3=np.array([acc_test3, acc_val3, acc_train3])
-pl.dump(dump3, open("acc3", "wb"))
 
 acc_test=np.zeros(10)
 acc_train=np.zeros(10)
@@ -349,9 +339,6 @@ for i in np.arange(10,110,10):
   acc_test[(i/10)-1]   = (100 * np.mean((predicted_test_labels    ==   test_label).astype(float)))
   acc_val[(i/10)-1]     = (100 * np.mean((predicted_val_labels    ==    validation_label).astype(float)))
   acc_train[(i/10)-1]  = (100 * np.mean(((predicted_train_labels.ravel())  == train_label).astype(float)))
-   
-dumpLoop=np.array([acc_test, acc_val, acc_train])
-pl.dump(dumpLoop, open("accLoop", "wb"))
 
 
 """
@@ -369,18 +356,12 @@ W_b = nn_params.x.reshape((n_feature + 1, n_class))
 
 # Find the accuracy on Training Dataset
 predicted_label_b = mlrPredict(W_b, train_data)
-trainA=100 * np.mean(((predicted_label_b.ravel()) == train_label).astype(float))
 print('\n Training set Accuracy:' + str(100 * np.mean(((predicted_label_b.ravel()) == train_label).astype(float))) + '%')
 
 # Find the accuracy on Validation Dataset
 predicted_label_b = mlrPredict(W_b, validation_data)
-valA=100 * np.mean((predicted_label_b == validation_label).astype(float))
 print('\n Validation set Accuracy:' + str(100 * np.mean((predicted_label_b == validation_label).astype(float))) + '%')
 
 # Find the accuracy on Testing Dataset
 predicted_label_b = mlrPredict(W_b, test_data)
-testA=100 * np.mean((predicted_label_b == test_label).astype(float))
 print('\n Testing set Accuracy:' + str(100 * np.mean((predicted_label_b == test_label).astype(float))) + '%')
-
-mlrLogReg=np.array([testA, valA, trainA])
-pl.dump(mlrLogReg, open('accF', 'wb'))
